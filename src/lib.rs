@@ -61,7 +61,7 @@ pub fn run_dev() {
     let original_dir = env::current_dir().expect("Could not get current directory.");
     env::set_current_dir(Path::new("frontend")).expect("Could not change current directory.");
     // TODO run command in background
-    Command::new("npm").args(vec!["run","dev"]).output();
+    Command::new("npm").args(vec!["run","dev"]).output().expect("Failed to start frontend dev server.");
     env::set_current_dir(original_dir).expect("Could not change current directory.");
 }
 
