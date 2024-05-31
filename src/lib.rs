@@ -1,32 +1,16 @@
 pub mod cli;
+pub mod system_caller;
 
 use std::fs;
 use std::path::Path;
-use std::process::Command;
+use system_caller::SystemCaller;
 
 
 pub fn new_project(name: &String) {
     println!("New project!: {}",name);
-    fs::create_dir(name);
-}
-
-trait SystemCaller {
-    fn command_successful(&mut self, command: &str) -> bool;
-}
-struct ProductionSystemCaller;
-impl SystemCaller for ProductionSystemCaller {
-    fn command_successful(&mut self, command: &str) -> bool {
-        let mut parts_iter = command.split_whitespace();
-        let command_name: &str = parts_iter.next().expect("Failed to parse command.");
-        let args: Vec<&str> = parts_iter.collect();
-        let result = Command::new(command_name)
-            .args(args)
-            .output();
-        match result {
-            Ok(output) => output.status.success(),
-            Err(error) => false
-        }
-    }
+    fs::create_dir(name).expect("Failed to create folder.");
+    fs::create_dir(Path::new(name).join("frontend")).expect("Failed to create folder.");
+    fs::create_dir(Path::new(name).join("backend")).expect("Failed to create folder.");
 }
 
 fn requirements_installed(system_caller: &mut dyn SystemCaller) -> bool {
@@ -42,6 +26,7 @@ mod tests {
 
     #[test]
     fn test_new_project_creates_dir_with_file() {
+        // TODO this is more of an integration test - move to tests/ folder
         let name = "xyloproject";
 
         let original_dir = env::current_dir().expect("Failed to get current directory.");
@@ -53,46 +38,10 @@ mod tests {
 
         let file_path = format!("{}", name);
         assert!(Path::new(&file_path).exists());
+        assert!(Path::new(&file_path).join("frontend").exists());
+        assert!(Path::new(&file_path).join("backend").exists());
 
         env::set_current_dir(&original_dir).expect("Failed to change directory back.");
         temp_dir.close().expect("Failed to delete temporary directory.");
-    }
-
-    #[test]
-    fn test_command_successful_returns_true_for_successful_command() {
-        assert_eq!(ProductionSystemCaller.command_successful("echo hi"), true);
-    }
-    #[test]
-    fn test_command_successful_returns_false_for_failed_command() {
-        assert_eq!(ProductionSystemCaller.command_successful("false"), false);
-    }
-    #[test]
-    fn test_command_successful_returns_false_for_command_not_found() {
-        assert_eq!(ProductionSystemCaller.command_successful("this-is-not-a-valid-command someargs"), false);
-    }
-
-    #[derive(Default)]
-    struct FakeSystemCaller {
-        calls: Vec<String>
-    }
-    impl SystemCaller for FakeSystemCaller {
-        fn command_successful(&mut self, command: &str) -> bool {
-            self.calls.push(command.to_string());
-            true
-        }
-    }
-    #[test]
-    fn test_fake_system_caller_sets_last_call_properly() {
-        let mut caller = FakeSystemCaller::default();
-        assert_eq!(caller.calls.len(), 0);
-        caller.command_successful("something");
-        assert_eq!(caller.calls[0], "something");
-    }
-    
-    #[test]
-    fn test_requirements_installed_checks_npx() {
-        let mut caller = FakeSystemCaller::default();
-        requirements_installed(&mut caller);
-        assert_eq!(caller.calls[0], "npx --version");
     }
 }
