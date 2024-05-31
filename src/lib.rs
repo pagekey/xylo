@@ -23,32 +23,40 @@ pub fn run_new(name: &String) {
     fs::File::create(Path::new(name).join("xylo.yaml")).expect("Failed to create xylo.yaml.");
     // cd into frontend and generate next project
     let original_dir = env::current_dir().expect("Could not get current directory.");
-    env::set_current_dir(Path::new(name).join("frontend")).expect("Could not change current directory.");
-    let npx_args = format!("npx create-next-app@13 {} --typescript --eslint --tailwind --src-dir --no-app --import-alias @/*", name);
-    Command::new("npx").args(npx_args.as_str().split_whitespace()).output().expect("Failed to create next project.");
+    env::set_current_dir(Path::new(name)).expect("Could not change current directory.");
+    // let npx_args = format!("npx create-next-app@13 {} --typescript --eslint --tailwind --src-dir --no-app --import-alias @/*", name);
+    // Command::new("npx").args(npx_args.as_str().split_whitespace()).output().expect("Failed to create next project.");
     // Move everything in the generated folder up one level
-    let entries = fs::read_dir(Path::new(name)).expect("Failed to read directory.");
-    for entry in entries {
-        let entry = entry.expect("Failed to list file.");
-        fs::rename(entry.path(), entry.file_name()).expect("Failed to rename file.");
-    }
+    // let entries = fs::read_dir(Path::new(name)).expect("Failed to read directory.");
+    // for entry in entries {
+    //     let entry = entry.expect("Failed to list file.");
+    //     fs::rename(entry.path(), entry.file_name()).expect("Failed to rename file.");
+    // }
     // Remove the nested (now empty) frontend dir
-    fs::remove_dir(Path::new(name)).expect("Failed to remove nested directory.");
+    // fs::remove_dir(Path::new(name)).expect("Failed to remove nested directory.");
     // Install mantine
-    let npm_args = "i --save-dev postcss postcss-preset-mantine postcss-simple-vars";
-    Command::new("npm").args(npm_args.split_whitespace()).output().expect("Failed to install dev deps for mantine.");
-    let npm_args = "i --save @mantine/core @mantine/hooks";
-    Command::new("npm").args(npm_args.split_whitespace()).output().expect("Failed to install deps for mantine.");
+    // let npm_args = "i --save-dev postcss postcss-preset-mantine postcss-simple-vars";
+    // Command::new("npm").args(npm_args.split_whitespace()).output().expect("Failed to install dev deps for mantine.");
+    // let npm_args = "i --save @mantine/core @mantine/hooks";
+    // Command::new("npm").args(npm_args.split_whitespace()).output().expect("Failed to install deps for mantine.");
 
     // Try outputting a template file
-    if let Some(file) = Asset::get("index.html") {
-        let content = file.data.as_ref();
-        let path = Path::new("index.html");
-        let mut file = fs::File::create(path).expect("Failed to create file.");
-        file.write_all(content).expect("Failed to write template content to file.");
-        println!("Copied template.");
-    } else {
-        eprintln!("Failed to render template.");
+    // if let Some(file) = Asset::get("index.html") {
+    //     let content = file.data.as_ref();
+    //     let path = Path::new("index.html");
+    //     println!("Copied template.");
+    // } else {
+    //     eprintln!("Failed to render template.");
+    // }
+    for file in Asset::iter() {
+        let file_in = Asset::get(file.as_ref()).unwrap();
+        let file_out_path = Path::new(file.as_ref());
+        if let Some(dir) = file_out_path.parent() {
+            fs::create_dir_all(dir).unwrap();
+        }
+        let mut file_out = fs::File::create(file_out_path).expect("Failed to create file.");
+        let content = file_in.data.as_ref();
+        file_out.write_all(content).expect("Failed to write template content to file.");
     }
 
     // Restore original directory
