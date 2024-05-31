@@ -3,9 +3,15 @@ pub mod system_caller;
 
 use std::env;
 use std::fs;
+use std::io::Write;
 use std::path::Path;
 use std::process::Command;
 use system_caller::{ProductionSystemCaller, SystemCaller};
+use rust_embed::RustEmbed;
+
+#[derive(RustEmbed)]
+#[folder="templates/"]
+struct Asset;
 
 
 pub fn run_new(name: &String) {
@@ -33,6 +39,18 @@ pub fn run_new(name: &String) {
     Command::new("npm").args(npm_args.split_whitespace()).output().expect("Failed to install dev deps for mantine.");
     let npm_args = "i --save @mantine/core @mantine/hooks";
     Command::new("npm").args(npm_args.split_whitespace()).output().expect("Failed to install deps for mantine.");
+
+    // Try outputting a template file
+    if let Some(file) = Asset::get("index.html") {
+        let content = file.data.as_ref();
+        let path = Path::new("index.html");
+        let mut file = fs::File::create(path).expect("Failed to create file.");
+        file.write_all(content).expect("Failed to write template content to file.");
+        println!("Copied template.");
+    } else {
+        eprintln!("Failed to render template.");
+    }
+
     // Restore original directory
     env::set_current_dir(original_dir).expect("Could not change current directory.");
 }
