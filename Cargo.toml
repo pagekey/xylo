@@ -7,3 +7,6 @@ edition = "2021"
 
 [dependencies]
 structopt = "0.3.26"
+
+[dev-dependencies]
+tempdir = "0.3.7"
