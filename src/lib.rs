@@ -18,12 +18,8 @@ pub fn run_new(name: &String) {
     // cd into frontend and generate next project
     let original_dir = env::current_dir().expect("Could not get current directory.");
     env::set_current_dir(Path::new(name).join("frontend")).expect("Could not change current directory.");
-    let mut system_caller = ProductionSystemCaller;
-    if system_caller.command_successful(format!("npx create-next-app@13 {} --typescript --eslint --tailwind --src-dir --no-app --import-alias @/*", name).as_str()) {
-        println!("Success!");
-    } else {
-        panic!("Failed to create next project.")
-    }
+    let npx_args = format!("npx create-next-app@13 {} --typescript --eslint --tailwind --src-dir --no-app --import-alias @/*", name);
+    Command::new("npx").args(npx_args.as_str().split_whitespace()).output().expect("Failed to create next project.");
     // Move everything in the generated folder up one level
     let entries = fs::read_dir(Path::new(name)).expect("Failed to read directory.");
     for entry in entries {
@@ -32,6 +28,12 @@ pub fn run_new(name: &String) {
     }
     // Remove the nested (now empty) frontend dir
     fs::remove_dir(Path::new(name)).expect("Failed to remove nested directory.");
+    // Install mantine
+    let npm_args = "i --save-dev postcss postcss-preset-mantine postcss-simple-vars";
+    Command::new("npm").args(npm_args.split_whitespace()).output().expect("Failed to install dev deps for mantine.");
+    let npm_args = "i --save @mantine/core @mantine/hooks";
+    Command::new("npm").args(npm_args.split_whitespace()).output().expect("Failed to install deps for mantine.");
+    // Restore original directory
     env::set_current_dir(original_dir).expect("Could not change current directory.");
 }
 
@@ -65,7 +67,7 @@ mod tests {
         let dir_path = temp_dir.path();
         env::set_current_dir(&dir_path).expect("Failed to change directory.");
         
-        new_project(&name.to_string());
+        run_new(&name.to_string());
 
         let file_path = format!("{}", name);
         assert!(Path::new(&file_path).exists());
