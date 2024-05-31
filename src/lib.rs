@@ -4,10 +4,11 @@ pub mod system_caller;
 use std::env;
 use std::fs;
 use std::path::Path;
+use std::process::Command;
 use system_caller::{ProductionSystemCaller, SystemCaller};
 
 
-pub fn new_project(name: &String) {
+pub fn run_new(name: &String) {
     println!("New project!: {}",name);
     // Generate directories and empty files
     fs::create_dir(name).expect("Failed to create folder.");
@@ -18,7 +19,7 @@ pub fn new_project(name: &String) {
     let original_dir = env::current_dir().expect("Could not get current directory.");
     env::set_current_dir(Path::new(name).join("frontend")).expect("Could not change current directory.");
     let mut system_caller = ProductionSystemCaller;
-    if system_caller.command_successful(format!("npx create-next-app@13 {} --typescript --eslint --tailwind --src-dir --no-app --import-alias '@/*'", name).as_str()) {
+    if system_caller.command_successful(format!("npx create-next-app@13 {} --typescript --eslint --tailwind --src-dir --no-app --import-alias @/*", name).as_str()) {
         println!("Success!");
     } else {
         panic!("Failed to create next project.")
@@ -31,6 +32,16 @@ pub fn new_project(name: &String) {
     }
     // Remove the nested (now empty) frontend dir
     fs::remove_dir(Path::new(name)).expect("Failed to remove nested directory.");
+    env::set_current_dir(original_dir).expect("Could not change current directory.");
+}
+
+pub fn run_dev() {
+    println!("Frontend listening on http://localhost:3000");
+    // TODO check if xylo.yaml is in the current dir
+    let original_dir = env::current_dir().expect("Could not get current directory.");
+    env::set_current_dir(Path::new("frontend")).expect("Could not change current directory.");
+    // TODO run command in background
+    Command::new("npm").args(vec!["run","dev"]).output();
     env::set_current_dir(original_dir).expect("Could not change current directory.");
 }
 
