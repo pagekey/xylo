@@ -4,7 +4,7 @@ use std::process::Command;
 pub trait SystemCaller {
     fn command_successful(&mut self, command: &str) -> bool;
 }
-struct ProductionSystemCaller;
+pub struct ProductionSystemCaller;
 impl SystemCaller for ProductionSystemCaller {
     fn command_successful(&mut self, command: &str) -> bool {
         let mut parts_iter = command.split_whitespace();

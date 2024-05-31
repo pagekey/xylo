@@ -1,16 +1,37 @@
 pub mod cli;
 pub mod system_caller;
 
+use std::env;
 use std::fs;
 use std::path::Path;
-use system_caller::SystemCaller;
+use system_caller::{ProductionSystemCaller, SystemCaller};
 
 
 pub fn new_project(name: &String) {
     println!("New project!: {}",name);
+    // Generate directories and empty files
     fs::create_dir(name).expect("Failed to create folder.");
     fs::create_dir(Path::new(name).join("frontend")).expect("Failed to create folder.");
     fs::create_dir(Path::new(name).join("backend")).expect("Failed to create folder.");
+    fs::File::create(Path::new(name).join("xylo.yaml")).expect("Failed to create xylo.yaml.");
+    // cd into frontend and generate next project
+    let original_dir = env::current_dir().expect("Could not get current directory.");
+    env::set_current_dir(Path::new(name).join("frontend")).expect("Could not change current directory.");
+    let mut system_caller = ProductionSystemCaller;
+    if system_caller.command_successful(format!("npx create-next-app@13 {} --typescript --eslint --tailwind --src-dir --no-app --import-alias '@/*'", name).as_str()) {
+        println!("Success!");
+    } else {
+        panic!("Failed to create next project.")
+    }
+    // Move everything in the generated folder up one level
+    let entries = fs::read_dir(Path::new(name)).expect("Failed to read directory.");
+    for entry in entries {
+        let entry = entry.expect("Failed to list file.");
+        fs::rename(entry.path(), entry.file_name()).expect("Failed to rename file.");
+    }
+    // Remove the nested (now empty) frontend dir
+    fs::remove_dir(Path::new(name)).expect("Failed to remove nested directory.");
+    env::set_current_dir(original_dir).expect("Could not change current directory.");
 }
 
 fn requirements_installed(system_caller: &mut dyn SystemCaller) -> bool {
@@ -21,7 +42,6 @@ fn requirements_installed(system_caller: &mut dyn SystemCaller) -> bool {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::env;
     use tempdir::TempDir;
 
     #[test]
@@ -39,7 +59,9 @@ mod tests {
         let file_path = format!("{}", name);
         assert!(Path::new(&file_path).exists());
         assert!(Path::new(&file_path).join("frontend").exists());
+        assert!(Path::new(&file_path).join("frontend").join("package.json").exists());
         assert!(Path::new(&file_path).join("backend").exists());
+        assert!(Path::new(&file_path).join("xylo.yaml").exists());
 
         env::set_current_dir(&original_dir).expect("Failed to change directory back.");
         temp_dir.close().expect("Failed to delete temporary directory.");
