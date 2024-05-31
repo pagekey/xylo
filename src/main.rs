@@ -1,7 +1,6 @@
 use structopt::StructOpt;
 
-mod cli;
-use cli::{Cli, ProjectHandler, DefaultProjectHandler};
+use xylo::cli::{Cli, ProjectHandler, DefaultProjectHandler};
 
 
 fn main() {

@@ -1,5 +1,5 @@
 use structopt::StructOpt;
-
+use crate::new_project;
 
 #[derive(StructOpt, Debug, PartialEq)]
 #[structopt(name="xylo", about="Self-hosted app creation kit")]
@@ -21,7 +21,7 @@ impl ProjectHandler for DefaultProjectHandler {
         }
     }
     fn handle_new(&self, project_name: &String) {
-        println!("New project: {:?}", project_name);
+        new_project(project_name);
     }
 }
 
