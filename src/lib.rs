@@ -22,8 +22,6 @@ pub fn run_new(name: &String) {
     println!("New project!: {}",name);
     // Generate directories and empty files
     fs::create_dir(name).expect("Failed to create folder.");
-    fs::create_dir(Path::new(name).join("frontend")).expect("Failed to create folder.");
-    fs::create_dir(Path::new(name).join("backend")).expect("Failed to create folder.");
     fs::File::create(Path::new(name).join("xylo.yaml")).expect("Failed to create xylo.yaml.");
     // cd into frontend and generate next project
     let original_dir = env::current_dir().expect("Could not get current directory.");
@@ -31,10 +29,11 @@ pub fn run_new(name: &String) {
     // Copy files from template
     for file in Asset::iter() {
         let file_in = Asset::get(file.as_ref()).unwrap();
-        let file_out_path = Path::new(file.as_ref());
+        let file_out_path = Path::new(if file.as_ref() == ".ignore" { ".gitignore" } else { file.as_ref() });
         if let Some(dir) = file_out_path.parent() {
             fs::create_dir_all(dir).unwrap();
         }
+        
         let mut file_out = fs::File::create(file_out_path).expect("Failed to create file.");
         let content = file_in.data.as_ref();
         file_out.write_all(content).expect("Failed to write template content to file.");
@@ -50,7 +49,7 @@ pub fn run_dev() {
         println!("Installing dependencies...");
         Command::new("npm")
             .args(vec!["install"])
-            .current_dir(original_dir.join("frontend"))
+            .current_dir(original_dir.join(".xylo").join("frontend"))
             .output()
             .expect("Failed to install deps.");
         
@@ -74,7 +73,7 @@ pub fn run_dev() {
                     let original_dir = env::current_dir().expect("Could not get current directory.");
                     child = Some(Command::new("npm")
                         .args(vec!["run","dev"])
-                        .current_dir(original_dir.join("frontend"))
+                        .current_dir(original_dir.join(".xylo").join("frontend"))
                         .spawn()
                         .expect("Failed to start frontend dev server."));
                 }
@@ -109,7 +108,7 @@ pub fn run_dev() {
                     let original_dir = env::current_dir().expect("Could not get current directory.");
                     child = Some(Command::new("cargo")
                         .args(vec!["run"])
-                        .current_dir(original_dir.join("backend"))
+                        .current_dir(original_dir.join(".xylo").join("backend"))
                         .spawn()
                         .expect("Failed to start backend server."));
                 }
