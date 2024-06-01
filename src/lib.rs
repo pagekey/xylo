@@ -7,6 +7,7 @@ use std::io::Write;
 use std::path::Path;
 use std::process::{Child, Command};
 use rust_embed::RustEmbed;
+use walkdir::WalkDir;
 
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
@@ -46,13 +47,38 @@ pub fn run_new(name: &String) {
 pub fn run_dev() {
     if Path::new("xylo.yaml").exists() {
         let original_dir = env::current_dir().expect("Could not get current directory.");
+
+        // Copy all files for frontend/backend into the .xylo dir
+        for entry in WalkDir::new("backend").into_iter().filter_map(Result::ok) {
+            if entry.file_type().is_file() {
+                if let Some(dir) = entry.path().parent() {
+                    let target_dir = Path::new(".xylo").join(dir);
+                    fs::create_dir_all(target_dir).unwrap();
+                }
+                let target_path = Path::new(".xylo").join(entry.path());
+                fs::copy(entry.path(), target_path);
+            }
+        }
+        for entry in WalkDir::new("frontend").into_iter().filter_map(Result::ok) {
+            if entry.file_type().is_file() {
+                if let Some(dir) = entry.path().parent() {
+                    let target_dir = Path::new(".xylo").join(dir);
+                    fs::create_dir_all(target_dir).unwrap();
+                }
+                let target_path = Path::new(".xylo").join(entry.path());
+                fs::copy(entry.path(), target_path);
+            }
+        }
+        // Watch for changes and copy files when change detected.
+        // TODO implement
+
         println!("Installing dependencies...");
         Command::new("npm")
             .args(vec!["install"])
             .current_dir(original_dir.join(".xylo").join("frontend"))
             .output()
             .expect("Failed to install deps.");
-        
+
         // Set up CTRL-C handler
         let running = Arc::new(AtomicBool::new(true)); // for frontend thread
         let r = running.clone(); // for ctrl-c handler

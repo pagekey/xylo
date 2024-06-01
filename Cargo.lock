@@ -175,6 +175,7 @@ dependencies = [
  "rust-embed",
  "structopt",
  "tempdir",
+ "walkdir",
 ]
 
 [[package]]

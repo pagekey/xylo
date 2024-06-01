@@ -12,6 +12,7 @@ edition = "2021"
 ctrlc = "3.4.4"
 rust-embed = "8.4.0"
 structopt = "0.3.26"
+walkdir = "2.5.0"
 
 [dev-dependencies]
 tempdir = "0.3.7"
