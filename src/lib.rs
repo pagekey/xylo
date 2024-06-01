@@ -48,13 +48,17 @@ pub fn run_new(name: &String) {
 pub fn run_dev() {
     if Path::new("xylo.yaml").exists() {
         let original_dir = env::current_dir().expect("Could not get current directory.");
-        env::set_current_dir(Path::new("frontend")).expect("Could not change current directory.");
         println!("Installing dependencies...");
-        Command::new("npm").args(vec!["install"]).output().expect("Failed to install deps.");
+        Command::new("npm")
+            .args(vec!["install"])
+            .current_dir(original_dir.join("frontend"))
+            .output()
+            .expect("Failed to install deps.");
         
         // Set up CTRL-C handler
-        let running = Arc::new(AtomicBool::new(true));
-        let r = running.clone();
+        let running = Arc::new(AtomicBool::new(true)); // for frontend thread
+        let r = running.clone(); // for ctrl-c handler
+        let r2 = running.clone(); // for backend thread
 
         ctrlc::set_handler(move || {
             println!("CTRL-C pressed");
@@ -63,14 +67,15 @@ pub fn run_dev() {
         }).expect("Error setting CTRL-C handler.");
 
         println!("Frontend listening on http://localhost:3000");
-        // TODO run command in background
         
-        let handle = thread::spawn(move || {
+        let frontend_handle = thread::spawn(move || {
             let mut child: Option<Child> = None;
             while running.load(Ordering::SeqCst) {
                 if child.is_none() {
+                    let original_dir = env::current_dir().expect("Could not get current directory.");
                     child = Some(Command::new("npm")
                         .args(vec!["run","dev"])
+                        .current_dir(original_dir.join("frontend"))
                         .spawn()
                         .expect("Failed to start frontend dev server."));
                 }
@@ -98,11 +103,45 @@ pub fn run_dev() {
                 println!("Frontend killed.")
             }
         });
+        let backend_handle = thread::spawn(move || {
+            let mut child: Option<Child> = None;
+            while r2.load(Ordering::SeqCst) {
+                if child.is_none() {
+                    let original_dir = env::current_dir().expect("Could not get current directory.");
+                    child = Some(Command::new("cargo")
+                        .args(vec!["run"])
+                        .current_dir(original_dir.join("backend"))
+                        .spawn()
+                        .expect("Failed to start backend server."));
+                }
 
-        handle.join().unwrap();
+                if let Some(ref mut c) = child {
+                    match c.try_wait() {
+                        Ok(Some(status)) => {
+                            println!("Backend exited with status: {}", status);
+                            break;
+                        }
+                        Ok(None) => {
+                            // Still running
+                        }
+                        Err(e) => {
+                            println!("Error checking command status: {}", e);
+                            break;
+                        }
+                    }
+                }
+
+                thread::sleep(Duration::from_millis(100));
+            }
+            if let Some(mut c) = child {
+                c.kill().expect("Failed to kill backend.");
+                println!("Backend killed.")
+            }
+        });
+
+        frontend_handle.join().unwrap();
+        backend_handle.join().unwrap();
         println!("Done.");
-
-        env::set_current_dir(original_dir).expect("Could not change current directory.");
     } else {
         eprintln!("xylo.yaml not found - you are not in a xylo project. Generate one with `xylo new`.");
     }
