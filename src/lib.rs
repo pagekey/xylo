@@ -6,7 +6,6 @@ use std::fs;
 use std::io::Write;
 use std::path::Path;
 use std::process::{Child, Command};
-use system_caller::{ProductionSystemCaller, SystemCaller};
 use rust_embed::RustEmbed;
 
 use std::sync::atomic::{AtomicBool, Ordering};
@@ -145,10 +144,6 @@ pub fn run_dev() {
     } else {
         eprintln!("xylo.yaml not found - you are not in a xylo project. Generate one with `xylo new`.");
     }
-}
-
-fn requirements_installed(system_caller: &mut dyn SystemCaller) -> bool {
-    system_caller.command_successful("npx --version")
 }
 
 
