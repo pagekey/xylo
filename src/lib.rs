@@ -5,9 +5,14 @@ use std::env;
 use std::fs;
 use std::io::Write;
 use std::path::Path;
-use std::process::Command;
+use std::process::{Child, Command};
 use system_caller::{ProductionSystemCaller, SystemCaller};
 use rust_embed::RustEmbed;
+
+use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::Arc;
+use std::time::Duration;
+use std::thread;
 
 #[derive(RustEmbed)]
 #[folder="templates/"]
@@ -69,9 +74,57 @@ pub fn run_dev() {
         env::set_current_dir(Path::new("frontend")).expect("Could not change current directory.");
         println!("Installing dependencies...");
         Command::new("npm").args(vec!["install"]).output().expect("Failed to install deps.");
+        
+        // Set up CTRL-C handler
+        let running = Arc::new(AtomicBool::new(true));
+        let r = running.clone();
+
+        ctrlc::set_handler(move || {
+            println!("CTRL-C pressed");
+
+            r.store(false, Ordering::SeqCst);
+        }).expect("Error setting CTRL-C handler.");
+
         println!("Frontend listening on http://localhost:3000");
         // TODO run command in background
-        Command::new("npm").args(vec!["run","dev"]).output().expect("Failed to start frontend dev server.");
+        
+        let handle = thread::spawn(move || {
+            let mut child: Option<Child> = None;
+            while running.load(Ordering::SeqCst) {
+                if child.is_none() {
+                    child = Some(Command::new("npm")
+                        .args(vec!["run","dev"])
+                        .spawn()
+                        .expect("Failed to start frontend dev server."));
+                }
+
+                if let Some(ref mut c) = child {
+                    match c.try_wait() {
+                        Ok(Some(status)) => {
+                            println!("Frontend exited with status: {}", status);
+                            break;
+                        }
+                        Ok(None) => {
+                            // Still running
+                        }
+                        Err(e) => {
+                            println!("Error checking command status: {}", e);
+                            break;
+                        }
+                    }
+                }
+
+                thread::sleep(Duration::from_millis(100));
+            }
+            if let Some(mut c) = child {
+                c.kill().expect("Failed to kill frontend.");
+                println!("Frontend killed.")
+            }
+        });
+
+        handle.join().unwrap();
+        println!("Done.");
+
         env::set_current_dir(original_dir).expect("Could not change current directory.");
     } else {
         eprintln!("xylo.yaml not found - you are not in a xylo project. Generate one with `xylo new`.");
