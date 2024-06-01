@@ -1,9 +1,12 @@
 [package]
-name = "xylo"
+name = "pagekey-xylo"
+description = "Self-hosted app creation kit."
+license = "MIT"
+homepage = "https://github.com/pagekey/xylo"
+repository = "https://github.com/pagekey/xylo"
+readme = "README.md"
 version = "0.1.0"
 edition = "2021"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
 ctrlc = "3.4.4"
@@ -12,3 +15,7 @@ structopt = "0.3.26"
 
 [dev-dependencies]
 tempdir = "0.3.7"
+
+[[bin]]
+name = "xylo"
+path = "src/main.rs"

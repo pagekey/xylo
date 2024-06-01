@@ -1,6 +1,7 @@
-use structopt::StructOpt;
+extern crate pagekey_xylo as xylo;
 
 use xylo::cli::{Cli, ProjectHandler, DefaultProjectHandler};
+use structopt::StructOpt;
 
 
 fn main() {
