@@ -64,13 +64,18 @@ pub fn run_new(name: &String) {
 }
 
 pub fn run_dev() {
-    println!("Frontend listening on http://localhost:3000");
-    // TODO check if xylo.yaml is in the current dir
-    let original_dir = env::current_dir().expect("Could not get current directory.");
-    env::set_current_dir(Path::new("frontend")).expect("Could not change current directory.");
-    // TODO run command in background
-    Command::new("npm").args(vec!["run","dev"]).output().expect("Failed to start frontend dev server.");
-    env::set_current_dir(original_dir).expect("Could not change current directory.");
+    if Path::new("xylo.yaml").exists() {
+        let original_dir = env::current_dir().expect("Could not get current directory.");
+        env::set_current_dir(Path::new("frontend")).expect("Could not change current directory.");
+        println!("Installing dependencies...");
+        Command::new("npm").args(vec!["install"]).output().expect("Failed to install deps.");
+        println!("Frontend listening on http://localhost:3000");
+        // TODO run command in background
+        Command::new("npm").args(vec!["run","dev"]).output().expect("Failed to start frontend dev server.");
+        env::set_current_dir(original_dir).expect("Could not change current directory.");
+    } else {
+        eprintln!("xylo.yaml not found - you are not in a xylo project. Generate one with `xylo new`.");
+    }
 }
 
 fn requirements_installed(system_caller: &mut dyn SystemCaller) -> bool {
