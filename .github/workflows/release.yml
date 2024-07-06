@@ -1,0 +1,260 @@
+---
+# original source: https://github.com/xylo/xylo/blob/master/.github/workflows/release.yml
+name: Release
+
+on:
+  push:
+    branches:
+      - add-semantic-release # TODO remove this before merge
+      - main
+      - master
+      - next
+      - next-major
+      - beta
+      - alpha
+      - "[0-9]+.[0-9]+.x"
+      - "[0-9]+.x"
+
+# Only allow one release workflow to execute at a time, since each release
+# workflow uses shared resources (git tags, package registries)
+concurrency:
+  group: ${{ github.workflow }}
+
+env:
+  APP_NAME: xylo
+  DEBUG: napi:*
+  RUST_BACKTRACE: 1
+
+jobs:
+  get-next-version:
+    uses: semantic-release-action/next-release-version/.github/workflows/next-release-version.yml@v4
+
+  test:
+    name: Cargo test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@master
+        id: rust-toolchain
+        with:
+          toolchain: stable
+
+      - name: Cache cargo
+        uses: actions/cache@v4
+        id: cache-cargo
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            target/
+          key: ${{ runner.os }}-cargo-${{ steps.rust-toolchain.outputs.cachekey }}-${{ hashFiles('**/Cargo.lock') }}
+
+      - name: Cargo test
+        run: cargo test
+
+  # Compile native CLI binary
+  build-cli:
+    name: Build CLI ${{ matrix.build.target }}
+    if: needs.get-next-version.outputs.new-release-published == 'true'
+    runs-on: ${{ matrix.build.os }}
+    needs:
+      - get-next-version
+    env:
+      CARGO: cargo
+
+    strategy:
+      matrix:
+        build:
+          # alphabatized by target
+          # - os: macOS-latest
+          #   target: aarch64-apple-darwin
+          #   cross: true
+          # - os: ubuntu-latest
+          #   target: aarch64-unknown-linux-gnu
+          #   cross: true
+          # - os: ubuntu-latest
+          #   target: aarch64-unknown-linux-musl
+          #   cross: true
+          # - os: ubuntu-latest
+          #   target: i686-unknown-linux-gnu
+          #   cross: true
+          # - os: ubuntu-latest
+          #   target: i686-unknown-linux-musl
+          #   cross: true
+          # - os: macOS-latest
+          #   target: x86_64-apple-darwin
+          #   cross: false
+          - os: ubuntu-latest
+            target: x86_64-unknown-linux-gnu
+            cross: false
+          # - os: ubuntu-latest
+          #   target: x86_64-unknown-linux-musl
+          #   cross: false
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install build inputs
+        if: runner.os == 'Linux' && !matrix.build.cross
+        run: sudo apt install musl-tools
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@master
+        id: rust-toolchain
+        with:
+          toolchain: stable
+          target: ${{ matrix.build.target }}
+
+      - name: Cache cargo
+        uses: actions/cache@v4
+        id: cache-cargo
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            target/
+          key: ${{ runner.os }}-cargo-${{ steps.rust-toolchain.outputs.cachekey }}-${{ hashFiles('**/Cargo.lock') }}
+
+      - name: Install xylo
+        uses: taiki-e/install-action@v2
+        with:
+          tool: xylo@2
+
+      - name: Prepare semantic-release for Rust
+        run: xylo prepare ${{ needs.get-next-version.outputs.new-release-version }}
+
+      - name: Install cross
+        uses: taiki-e/install-action@v2
+        with:
+          tool: cross
+
+      - name: Configure cross
+        if: matrix.build.cross
+        run: echo "CARGO=cross" >> "$GITHUB_ENV"
+
+      - name: Compile release binary
+        run: ${{ env.CARGO }} build --bin xylo --release --target ${{ matrix.build.target }} --verbose
+
+      - name: Create release archive
+        run: |
+          mkdir dist
+          cp target/${{ matrix.build.target }}/release/xylo dist/xylo-${{ matrix.build.target }}
+
+      - name: Create binary checksum
+        run: shasum --algorithm 256 --binary xylo-${{ matrix.build.target }} | tee xylo-${{ matrix.build.target }}-SHA256SUM.txt
+        working-directory: ./dist
+
+      - name: Upload release artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.build.target }}
+          path: |
+            dist/xylo-${{ matrix.build.target }}
+            dist/xylo-${{ matrix.build.target }}-SHA256SUM.txt
+          if-no-files-found: error
+          retention-days: 1
+
+  release:
+    runs-on: ubuntu-latest
+    name: Release
+    if: needs.get-next-version.outputs.new-release-published == 'true'
+    needs:
+      - build-cli
+      - get-next-version
+      - test
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          # Fetch all history and tags for calculating next semantic version
+          fetch-depth: 0
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@master
+        id: rust-toolchain
+        with:
+          toolchain: stable
+
+      - name: Cache cargo
+        uses: actions/cache@v4
+        id: cache-cargo
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            target/
+          key: ${{ runner.os }}-cargo-${{ steps.rust-toolchain.outputs.cachekey }}-${{ hashFiles('**/Cargo.lock') }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+          check-latest: true
+          cache: npm
+
+      - name: Cache npm dependencies
+        uses: actions/cache@v4
+        id: cache-node-modules
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
+
+      - name: Install dependencies
+        if: steps.cache-node-modules.outputs.cache-hit != 'true'
+        run: npm ci --ignore-scripts --loglevel error
+
+      - name: Download release artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: ls artifacts
+        run: ls -R ./artifacts
+
+      - name: Prepare native artifacts
+        run: |
+          mkdir napi/
+          mv artifacts/bindings-aarch64-apple-darwin/xylo.darwin-arm64.node napi/
+          mv artifacts/bindings-x86_64-apple-darwin/xylo.darwin-x64.node napi/
+          mv artifacts/bindings-x86_64-unknown-linux-gnu/xylo.linux-x64-gnu.node napi/
+
+      - name: ls napi
+        run: ls -R ./napi
+
+      - name: Prepare GitHub Release artifacts
+        run: |
+          mkdir dist/
+          mv artifacts/aarch64-apple-darwin dist/
+          mv artifacts/aarch64-unknown-linux-gnu dist/
+          mv artifacts/aarch64-unknown-linux-musl dist/
+          mv artifacts/i686-unknown-linux-gnu dist/
+          mv artifacts/i686-unknown-linux-musl dist/
+          mv artifacts/x86_64-apple-darwin dist/
+          mv artifacts/x86_64-unknown-linux-gnu dist/
+          mv artifacts/x86_64-unknown-linux-musl dist/
+
+      - name: Combine checksums
+        run: cat dist/**/xylo-*-SHA256SUM.txt | tee dist/SHA256SUMS.txt
+
+      - name: Prepare xylo for local use
+        run: |
+          cp dist/x86_64-unknown-linux-musl/xylo-x86_64-unknown-linux-musl ./xylo
+          chmod +x ./xylo
+
+      - name: Invoke semantic-release
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npx semantic-release
