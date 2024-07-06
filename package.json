@@ -1,5 +1,5 @@
 {
-  "name": "xylo",
+  "name": "pagekey-xylo",
   "version": "0.1.0",
   "description": "Self-hosted app creation kit.",
   "main": "index.js",
