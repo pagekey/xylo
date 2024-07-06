@@ -113,31 +113,6 @@ jobs:
         with:
           path: artifacts
 
-      - name: ls artifacts
-        run: ls -R ./artifacts
-
-      - name: Prepare native artifacts
-        run: |
-          mkdir napi/
-          mv artifacts/bindings-aarch64-apple-darwin/xylo.darwin-arm64.node napi/
-          mv artifacts/bindings-x86_64-apple-darwin/xylo.darwin-x64.node napi/
-          mv artifacts/bindings-x86_64-unknown-linux-gnu/xylo.linux-x64-gnu.node napi/
-
-      - name: ls napi
-        run: ls -R ./napi
-
-      - name: Prepare GitHub Release artifacts
-        run: |
-          mkdir dist/
-          mv artifacts/aarch64-apple-darwin dist/
-          mv artifacts/aarch64-unknown-linux-gnu dist/
-          mv artifacts/aarch64-unknown-linux-musl dist/
-          mv artifacts/i686-unknown-linux-gnu dist/
-          mv artifacts/i686-unknown-linux-musl dist/
-          mv artifacts/x86_64-apple-darwin dist/
-          mv artifacts/x86_64-unknown-linux-gnu dist/
-          mv artifacts/x86_64-unknown-linux-musl dist/
-
       - name: Combine checksums
         run: cat dist/**/xylo-*-SHA256SUM.txt | tee dist/SHA256SUMS.txt
 
