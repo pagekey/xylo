@@ -95,7 +95,7 @@ jobs:
         with:
           node-version: lts/*
           check-latest: true
-          cache: npm
+          # cache: npm
 
       - name: Cache npm dependencies
         uses: actions/cache@v4
