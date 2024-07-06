@@ -32,4 +32,32 @@ curl http://localhost:5000
 
 ## Installation
 
-For now, there is no way to install the CLI other than to clone this repository and use `cargo build` to get a `xylo` executable in the `target/debug` directory, or replace all instances of `xylo` with `cargo run`.
+### Installing from Crates.io
+
+Run `cargo install pagekey-xylo`.
+
+### Local Installation
+
+1. Make sure you have `cargo` installed on your system.
+
+2. Clone this repo:
+
+```bash
+git clone https://github.com/pagekey/xylo.git
+```
+
+3. Enter the repo.
+
+```bash
+cd xylo
+```
+
+4. Build and install.
+
+```bash
+make install
+```
+
+### Uninstalling Local Installation
+
+Run `make uninstall`.
