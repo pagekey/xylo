@@ -192,7 +192,7 @@ mod tests {
         let file_path = format!("{}", name);
         assert!(Path::new(&file_path).exists());
         assert!(Path::new(&file_path).join("frontend").exists());
-        assert!(Path::new(&file_path).join("frontend").join("package.json").exists());
+        assert!(Path::new(&file_path).join(".xylo").join("frontend").join("package.json").exists());
         assert!(Path::new(&file_path).join("backend").exists());
         assert!(Path::new(&file_path).join("xylo.yaml").exists());
 
