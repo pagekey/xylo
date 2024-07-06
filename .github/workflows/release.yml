@@ -106,7 +106,7 @@ jobs:
 
       - name: Install dependencies
         if: steps.cache-node-modules.outputs.cache-hit != 'true'
-        run: npm ci --ignore-scripts --loglevel error
+        run: npm i --ignore-scripts --loglevel error
 
       - name: Download release artifacts
         uses: actions/download-artifact@v4
