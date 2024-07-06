@@ -113,8 +113,9 @@ jobs:
         with:
           path: artifacts
 
-      - name: Combine checksums
-        run: cat dist/**/xylo-*-SHA256SUM.txt | tee dist/SHA256SUMS.txt
+      - name: Check contents
+        run: |
+          find .
 
       - name: Prepare xylo for local use
         run: |
