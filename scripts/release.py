@@ -106,20 +106,23 @@ def compute_next_version(release_type: ReleaseType, tags: List[str]) -> str:
 def apply_tag(existing_tags: List[str], new_tag: str):
     if new_tag not in existing_tags:
         print(f"Tagging/pushing new tag: {new_tag}")
-        subprocess.run(
-            ["git", "tag", new_tag],
-            check=True,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            text=True, 
-        )
-        subprocess.run(
-            ["git", "push", "origin", new_tag],
-            check=True,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            text=True, 
-        )
+        new_tag_stripped = new_tag.replace("v", "")
+        commands = [
+            f"sed -i 's/^version = \"[0-9]\+.[0-9]\+.[0-9]\+\"/{new_tag_stripped}' cargo.toml",
+            f"sed -i 's/^\"version\": \"[0-9]\+.[0-9]\+.[0-9]\+\"/{new_tag_stripped}' package.json",
+            f"git add --all",
+            f"git commit -m '{new_tag}'",
+            f"git tag {new_tag}",
+            f"git push origin {new_tag}"
+        ]
+        for command in commands:
+            subprocess.run(
+                command.split(),
+                check=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True, 
+            )
     else:
         print(f"Tag {new_tag} already exists - skipping tag/push.")
 
