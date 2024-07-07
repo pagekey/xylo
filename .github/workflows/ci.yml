@@ -54,10 +54,5 @@ jobs:
         with:
           python-version: '3.x'
       
-      - name: testing
-        run: git tag
-      - name: testing2
-        run: git log
-
       - name: Run script
         run: python3 scripts/release.py
