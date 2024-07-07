@@ -4,7 +4,18 @@ import subprocess
 from typing import List
 
 
-PREFIXES = ["fix", "feat", "major"]
+class ReleaseType(enum.Enum):
+    NO_RELEASE = 0
+    PATCH = 1
+    MINOR = 2
+    MAJOR = 3
+
+
+PREFIXES = {
+    "fix": ReleaseType.PATCH,
+    "feat": ReleaseType.MINOR,
+    "major": ReleaseType.MAJOR,
+}
 
 
 def get_git_tags():
@@ -41,17 +52,15 @@ def get_commit_messages_since(commit_hash):
         return []
 
 
-
-class ReleaseType(enum.Enum):
-    MAJOR = "MAJOR"
-    MINOR = "MINOR"
-    PATCH = "PATCH"
-    NO_RELEASE = "NO_RELEASE"
-
-
 def compute_release_type(commits: List[str]):
-    return ReleaseType.NO_RELEASE
-
+    release_type = ReleaseType.NO_RELEASE
+    for commit in commits:
+        for prefix, prefix_release_type in PREFIXES.items():
+            if commit.startswith(f"{prefix}: "):
+                # Check whether this is greater than the existing value
+                if release_type.value < prefix_release_type.value:
+                    release_type = prefix_release_type
+    return release_type
 
 if __name__ == "__main__":
     tags = get_git_tags()

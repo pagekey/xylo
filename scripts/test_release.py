@@ -60,10 +60,25 @@ def test_compute_release_type_with_no_prefixes_returns_no_release():
     assert result == ReleaseType.NO_RELEASE
 
 def test_compute_release_type_with_only_fix_returns_patch():
-    pass
+    # Arrange.
+    commits = ["fix: Somewhat important", "another poorly formatted commit message"]
+    # Act.
+    result = compute_release_type(commits)
+    # Assert.
+    assert result == ReleaseType.PATCH
 
 def test_compute_release_type_with_fix_and_feat_returns_minor():
-    pass
+    # Arrange.
+    commits = ["fix: Somewhat important", "feat: another poorly formatted commit message"]
+    # Act.
+    result = compute_release_type(commits)
+    # Assert.
+    assert result == ReleaseType.MINOR
 
 def test_compute_release_type_with_major_returns_major():
-    pass
+    # Arrange.
+    commits = ["fix: Do something somewhat important", "feat: Add something", "major: Wow this is a big deal"]
+    # Act.
+    result = compute_release_type(commits)
+    # Assert.
+    assert result == ReleaseType.MAJOR
