@@ -68,10 +68,7 @@ def compute_release_type(commits: List[str]) -> ReleaseType:
     return release_type
 
 
-def compute_next_version(release_type: ReleaseType, tags: List[str]) -> str:
-    """."""
-    if len(tags) < 1:
-        return "v0.1.0"
+def get_biggest_tag(tags: List[str]):
     pattern = r'^v\d+\.\d+\.\d+$'
     max_version = (0, 1, 0)
     for tag in tags:
@@ -85,6 +82,15 @@ def compute_next_version(release_type: ReleaseType, tags: List[str]) -> str:
                 or (major == max_version[0] and minor > max_version[1]) \
                     or (major == max_version[0] and minor == max_version[1] and patch > max_version[2]):
                 max_version = (major, minor, patch)
+    return f"v{max_version[0]}.{max_version[1]}.{max_version[2]}"
+
+
+def compute_next_version(release_type: ReleaseType, tags: List[str]) -> str:
+    """."""
+    if len(tags) < 1:
+        return "v0.1.0"
+    major, minor, patch = get_biggest_tag(tags).replace("v", "").split(".")
+    max_version = (int(major), int(minor), int(patch))
     if release_type == ReleaseType.MAJOR:
         max_version = (max_version[0] + 1, 0, 0)
     elif release_type == ReleaseType.MINOR:
@@ -96,17 +102,28 @@ def compute_next_version(release_type: ReleaseType, tags: List[str]) -> str:
 
     return f"v{max_version[0]}.{max_version[1]}.{max_version[2]}"
 
+def apply_tag(existing_tags: List[str], new_tag: str):
+    if new_tag not in existing_tags:
+        subprocess.run(
+            ["git", "tag", new_tag],
+            check=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True, 
+        )
+        subprocess.run(
+            ["git", "push", "origin", new_tag],
+            check=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True, 
+        )
+
+
 if __name__ == "__main__":
     tags = get_git_tags()
-    if tags:
-        for tag in tags:
-            print("The tag:", tag)
-            print("Commits since")
-            commits = get_commit_messages_since(tag)
-            for commit in commits:
-                print("Commit:", commit)
-                for prefix in PREFIXES:
-                    if commit.startswith(f"{prefix}: "):
-                        print("PREFIX DETECTED:", commit)
-    else:
-        print("No tags")
+    max_tag = get_biggest_tag(tags)
+    commits = get_commit_messages_since(max_tag)
+    release_type = compute_release_type(commits)
+    next_version = compute_next_version(release_type)
+    apply_tag(next_version)

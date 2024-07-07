@@ -1,4 +1,4 @@
-from unittest.mock import patch, MagicMock
+from unittest.mock import call, patch, MagicMock
 
 from release import (
     get_git_tags,
@@ -6,6 +6,8 @@ from release import (
     ReleaseType,
     compute_release_type,
     compute_next_version,
+    apply_tag,
+    get_biggest_tag,
 )
 
 
@@ -96,6 +98,15 @@ def test_compute_release_type_with_major_returns_major():
     assert result == ReleaseType.MAJOR
 
 
+def test_get_biggest_tag_with_list_of_tags_returns_biggest_tag():
+    # Arrange.
+    tags = ["v0.2.0", "v0.3.0", "v1.2.3", "v1.0.0"]
+    # Act.
+    result = get_biggest_tag(tags)
+    # Assert.
+    assert result == "v1.2.3"
+
+
 def test_compute_next_version_with_no_existing_tags_returns_default_value():
     # Arrange.
     release_type = ReleaseType.MAJOR
@@ -140,3 +151,42 @@ def test_compute_next_version_with_major_bumps_major_value():
     result = compute_next_version(release_type, tags)
     # Assert.
     assert result == "v1.0.0"
+
+@patch("subprocess.run")
+def test_apply_tag_with_existing_tag_does_nothing(mock_run):
+    # Arrange.
+    existing_tags = ["v0.1.0", "v3.0.0", "v2.0.0"]
+    new_tag = "v3.0.0"
+
+    # Act.
+    result = apply_tag(existing_tags, new_tag)
+
+    # Assert.
+    mock_run.assert_not_called()
+
+@patch("subprocess.run")
+def test_apply_tag_with_new_tag_tags_and_pushes(mock_run):
+    # Arrange.
+    existing_tags = ["v0.1.0", "v3.0.0", "v2.0.0"]
+    new_tag = "v4.0.0"
+
+    # Act.
+    result = apply_tag(existing_tags, new_tag)
+
+    # Assert.
+    mock_run.assert_has_calls([
+        call(
+            f"git tag {new_tag}".split(),
+            check=True,
+            stdout=-1,
+            stderr=-1,
+            text=True,
+        ),
+        call(
+            f"git push origin {new_tag}".split(),
+            check=True,
+            stdout=-1,
+            stderr=-1,
+            text=True,
+        ),
+    ])
