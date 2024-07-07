@@ -15,8 +15,5 @@
   "bugs": {
     "url": "https://github.com/pagekey/xylo/issues"
   },
-  "homepage": "https://github.com/pagekey/xylo#readme",
-  "dependencies": {
-    "@semantic-release/changelog": "^6.0.3"
-  }
+  "homepage": "https://github.com/pagekey/xylo#readme"
 }
