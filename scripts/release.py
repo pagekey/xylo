@@ -2,6 +2,7 @@
 """."""
 import enum
 import re
+import sys
 import subprocess
 from typing import List
 
@@ -104,6 +105,7 @@ def compute_next_version(release_type: ReleaseType, tags: List[str]) -> str:
 
 def apply_tag(existing_tags: List[str], new_tag: str):
     if new_tag not in existing_tags:
+        print(f"Tagging/pushing new tag: {new_tag}")
         subprocess.run(
             ["git", "tag", new_tag],
             check=True,
@@ -118,12 +120,21 @@ def apply_tag(existing_tags: List[str], new_tag: str):
             stderr=subprocess.PIPE,
             text=True, 
         )
+    else:
+        print(f"Tag {new_tag} already exists - skipping tag/push.")
 
 
-if __name__ == "__main__":
+def cli_entrypoint(args=sys.argv[1:]):
+    dry_run = "--dry-run" in args
     tags = get_git_tags()
     max_tag = get_biggest_tag(tags)
     commits = get_commit_messages_since(max_tag)
     release_type = compute_release_type(commits)
-    next_version = compute_next_version(release_type)
-    apply_tag(next_version)
+    next_version = compute_next_version(release_type, tags)
+    if not dry_run:
+        apply_tag(next_version)
+    else:
+        print("Dry run mode - not applying version.")
+
+if __name__ == "__main__":
+    cli_entrypoint()
