@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
+import enum
 import subprocess
+from typing import List
 
 
 PREFIXES = ["fix", "feat", "major"]
@@ -37,6 +39,18 @@ def get_commit_messages_since(commit_hash):
     except subprocess.CalledProcessError as e:
         print(f"Error getting commit messages: {e.stderr}")
         return []
+
+
+
+class ReleaseType(enum.Enum):
+    MAJOR = "MAJOR"
+    MINOR = "MINOR"
+    PATCH = "PATCH"
+    NO_RELEASE = "NO_RELEASE"
+
+
+def compute_release_type(commits: List[str]):
+    return ReleaseType.NO_RELEASE
 
 
 if __name__ == "__main__":

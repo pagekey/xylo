@@ -3,6 +3,8 @@ from unittest.mock import patch, MagicMock
 from release import (
     get_git_tags,
     get_commit_messages_since,
+    ReleaseType,
+    compute_release_type,
 )
 
 
@@ -48,3 +50,20 @@ def test_get_commit_messages_since_with_valid_hash_returns_list_of_messages(mock
     )
     assert result[0] == "Do something"
     assert result[1] == "Do something else"
+
+def test_compute_release_type_with_no_prefixes_returns_no_release():
+    # Arrange.
+    commits = ["nothing important", "another poorly formatted commit message"]
+    # Act.
+    result = compute_release_type(commits)
+    # Assert.
+    assert result == ReleaseType.NO_RELEASE
+
+def test_compute_release_type_with_only_fix_returns_patch():
+    pass
+
+def test_compute_release_type_with_fix_and_feat_returns_minor():
+    pass
+
+def test_compute_release_type_with_major_returns_major():
+    pass
