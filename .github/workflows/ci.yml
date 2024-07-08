@@ -38,5 +38,11 @@ jobs:
       - name: Install semver
         run: pip3 install pagekey-semver
 
-      - name: Run script
-        run: pagekey-semver
+      - name: Run semver (dry run unless tag)
+        run: |
+          if [[ "${GITHUB_REF}" == refs/heads/* ]]; then
+            pagekey-semver --dry-run
+          elif [[ "${GITHUB_REF}" == refs/tags/* ]]; then
+            pagekey-semver
+          fi
+        shell: bash
