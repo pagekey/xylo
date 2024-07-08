@@ -38,11 +38,16 @@ jobs:
       - name: Install semver
         run: pip3 install pagekey-semver
 
-      - name: Run semver (dry run unless tag)
-        run: |
-          if [[ "${GITHUB_REF}" == refs/heads/* ]]; then
-            pagekey-semver --dry-run
-          elif [[ "${GITHUB_REF}" == refs/tags/* ]]; then
-            pagekey-semver
-          fi
-        shell: bash
+      - name: Run semver live when on main
+        if: github.ref == 'refs/heads/main'
+        run: pagekey-semver --dry-run
+
+      - name: Run semver dry-run when not on main
+        if: github.ref != 'refs/heads/main'
+        run: pagekey-semver --dry-run
+
+      - name: DEBUG make sure version files get updated
+        run: cat Cargo.toml && cat package.json
+      
+      - name: check some more stuff
+        run: git log -n 1
