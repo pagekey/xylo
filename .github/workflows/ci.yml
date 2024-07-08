@@ -45,9 +45,3 @@ jobs:
       - name: Run semver dry-run when not on main
         if: github.ref != 'refs/heads/main'
         run: pagekey-semver --dry-run
-
-      - name: DEBUG make sure version files get updated
-        run: cat Cargo.toml && cat package.json
-      
-      - name: check some more stuff
-        run: git log -n 1
