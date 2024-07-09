@@ -44,8 +44,6 @@ jobs:
 
       - name: Run semver dry-run when not on main
         if: github.ref != 'refs/heads/main'
-        run: |
-          pagekey-semver
-          git push
+        run: pagekey-semver
         # TODO uncomment:
         # run: pagekey-semver --dry-run
