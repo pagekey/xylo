@@ -1,0 +1,19 @@
+{
+  "name": "pagekey-xylo",
+  "version": "0.1.10",
+  "description": "Self-hosted app creation kit.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pagekey/xylo.git"
+  },
+  "author": "PageKey",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/pagekey/xylo/issues"
+  },
+  "homepage": "https://github.com/pagekey/xylo#readme"
+}
