@@ -41,4 +41,10 @@ mod tests {
         let cli = Cli::from_iter(&["xylo", "new", "myproject"]);
         assert_eq!(cli, Cli::New { project_name: "myproject".into() });
     }
+
+    #[test]
+    fn test_parse_dev() {
+        let cli = Cli::from_iter(&["xylo", "dev"]);
+        assert_eq!(cli, Cli::Dev);
+    }
 }

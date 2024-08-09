@@ -56,7 +56,7 @@ pub fn run_dev() {
                     fs::create_dir_all(target_dir).unwrap();
                 }
                 let target_path = Path::new(".xylo").join(entry.path());
-                fs::copy(entry.path(), target_path);
+                fs::copy(entry.path(), target_path).expect("Failed to copy file.");
             }
         }
         for entry in WalkDir::new("frontend").into_iter().filter_map(Result::ok) {
@@ -66,7 +66,7 @@ pub fn run_dev() {
                     fs::create_dir_all(target_dir).unwrap();
                 }
                 let target_path = Path::new(".xylo").join(entry.path());
-                fs::copy(entry.path(), target_path);
+                fs::copy(entry.path(), target_path).expect("Failed to copy file.");
             }
         }
         // Watch for changes and copy files when change detected.
