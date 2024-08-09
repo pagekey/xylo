@@ -1,8 +1,14 @@
 name: Test and release Xylo package
 
-on: [push]
+on:
+  push:
+    branches-ignore:
+      - 'refs/tags/*'
 
 jobs:
+
+  version:
+    uses: pagekey/semver/.github/workflows/semver.yml@main  
 
   test-rust:
     name: Cargo test
@@ -19,31 +25,3 @@ jobs:
       
       - name: Cargo test
         run: cargo test
-
-  run-release:
-    runs-on: ubuntu-latest
-    needs:
-      - test-rust
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0  # fetch all commits instead of just current one
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.x'
-      
-      - name: Install semver
-        run: pip3 install pagekey-semver
-
-      - name: Run semver live when on main
-        if: github.ref == 'refs/heads/main'
-        run: pagekey-semver apply
-
-      - name: Run semver dry-run when not on main
-        if: github.ref != 'refs/heads/main'
-        run: pagekey-semver apply
-        # TODO uncomment:
-        # run: pagekey-semver plan
