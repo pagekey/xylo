@@ -47,3 +47,4 @@ jobs:
         run: pagekey-semver apply
         # TODO uncomment:
         # run: pagekey-semver plan
+
