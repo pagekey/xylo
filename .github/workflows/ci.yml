@@ -40,10 +40,10 @@ jobs:
 
       - name: Run semver live when on main
         if: github.ref == 'refs/heads/main'
-        run: pagekey-semver --dry-run
+        run: pagekey-semver apply
 
       - name: Run semver dry-run when not on main
         if: github.ref != 'refs/heads/main'
-        run: pagekey-semver
+        run: pagekey-semver apply
         # TODO uncomment:
-        # run: pagekey-semver --dry-run
+        # run: pagekey-semver plan
