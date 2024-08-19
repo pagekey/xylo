@@ -1,3 +1,7 @@
+[[bin]]
+name = "xylo"
+path = "src/main.rs"
+
 [package]
 name = "pagekey-xylo"
 description = "Self-hosted app creation kit."
@@ -5,7 +9,7 @@ license = "MIT"
 homepage = "https://github.com/pagekey/xylo"
 repository = "https://github.com/pagekey/xylo"
 readme = "README.md"
-version = "1.0.3"
+version = "0.1.1"
 edition = "2021"
 
 [dependencies]
@@ -16,7 +20,3 @@ walkdir = "2.5.0"
 
 [dev-dependencies]
 tempdir = "0.3.7"
-
-[[bin]]
-name = "xylo"
-path = "src/main.rs"
