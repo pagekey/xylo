@@ -1,4 +1,3 @@
-prefixes: []
 file_replacers:
   - name: Cargo.toml
     type: toml
