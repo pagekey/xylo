@@ -1,3 +1,7 @@
+## v0.2.1
+
+- fix: Fix tsconfig so that intellisense doesn't err (185763ee)
+
 ## v0.2.0
 
 - feat: Upgrade to Next 14 (16bebf99)
