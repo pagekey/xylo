@@ -1,3 +1,7 @@
+## v0.3.1
+
+- fix: Stop overwriting files on dev (4c135648)
+
 ## v0.3.0
 
 - feat: Add simple web server with warp (6bff2ec7)
