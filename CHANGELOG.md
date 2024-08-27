@@ -1,3 +1,7 @@
+## v0.3.2
+
+- fix: Allow any origin with CORS (abfc4239)
+
 ## v0.3.1
 
 - fix: Stop overwriting files on dev (4c135648)

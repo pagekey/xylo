@@ -9,7 +9,7 @@ license = "MIT"
 homepage = "https://github.com/pagekey/xylo"
 repository = "https://github.com/pagekey/xylo"
 readme = "README.md"
-version = "0.3.1"
+version = "0.3.2"
 edition = "2021"
 
 [dependencies]
