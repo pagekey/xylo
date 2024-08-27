@@ -1,11 +1,16 @@
 use std::thread;
 use std::time::Duration;
+use warp::Filter;
 
 
-fn main() {
+#[tokio::main]
+async fn main() {
     println!("Starting backend.");
-    loop {
-        println!("Sleeping backend.");
-        thread::sleep(Duration::from_secs(10));
-    }
+    let hello = warp::path::end()
+        .map(|| warp::reply::html("hello world"));
+
+    // Start the warp server
+    warp::serve(hello)
+        .run(([127, 0, 0, 1], 5000))
+        .await;
 }

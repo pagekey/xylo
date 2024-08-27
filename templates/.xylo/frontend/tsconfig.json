@@ -24,6 +24,9 @@
     "paths": {
       "@/*": [
         "./src/*"
+      ],
+      "*": [
+        "../.xylo/frontend/node_modules/*"
       ]
     }
   },
