@@ -28,9 +28,11 @@ fn copy_template_files() {
             fs::create_dir_all(dir).unwrap();
         }
         
-        let mut file_out = fs::File::create(file_out_path).expect("Failed to create file.");
-        let content = file_in.data.as_ref();
-        file_out.write_all(content).expect("Failed to write template content to file.");
+        if !Path::new(file_out_path).exists() {
+            let mut file_out = fs::File::create(file_out_path).expect("Failed to create file.");
+            let content = file_in.data.as_ref();
+            file_out.write_all(content).expect("Failed to write template content to file.");
+        }
     }
 }
 
