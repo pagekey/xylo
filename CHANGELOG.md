@@ -1,3 +1,7 @@
+## v0.1.2
+
+- fix: Copy template files on each `xylo dev` run (8410cdd7)
+
 ## v0.1.1
 
 - fix: Remove prefix override (797f97a5)
