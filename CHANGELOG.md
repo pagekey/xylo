@@ -1,3 +1,7 @@
+## v0.2.0
+
+- feat: Upgrade to Next 14 (16bebf99)
+
 ## v0.1.2
 
 - fix: Copy template files on each `xylo dev` run (8410cdd7)
