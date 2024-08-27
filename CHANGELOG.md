@@ -1,3 +1,7 @@
+## v0.3.0
+
+- feat: Add simple web server with warp (6bff2ec7)
+
 ## v0.2.1
 
 - fix: Fix tsconfig so that intellisense doesn't err (185763ee)
