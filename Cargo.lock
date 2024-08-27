@@ -169,7 +169,7 @@ dependencies = [
 
 [[package]]
 name = "pagekey-xylo"
-version = "0.2.1"
+version = "0.3.0"
 dependencies = [
  "ctrlc",
  "rust-embed",
