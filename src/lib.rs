@@ -41,13 +41,17 @@ fn copy_template_files(dot_xylo_only: bool) {
 }
 
 #[tokio::main]
-pub async fn start() {
+pub async fn start(func: fn() -> String) {
+    let arc = std::sync::Arc::new(func);
     println!("Starting backend.");
     let cors = warp::cors()
         .allow_any_origin();
 
     let hello = warp::path::end()
-        .map(|| warp::reply::html("hello world2"))
+        .map(move || {
+            let response = (arc)();
+            warp::reply::html(response)
+        })
         .with(cors);
 
     // Start the warp server
