@@ -19,19 +19,21 @@ use std::thread;
 struct Asset;
 
 
-fn copy_template_files() {
+fn copy_template_files(dot_xylo_only: bool) {
     // Copy files from template
     for file in Asset::iter() {
-        let file_in = Asset::get(file.as_ref()).unwrap();
-        let file_out_path = Path::new(if file.as_ref() == ".ignore" { ".gitignore" } else { file.as_ref() });
-        if let Some(dir) = file_out_path.parent() {
-            fs::create_dir_all(dir).unwrap();
-        }
-        
-        if !Path::new(file_out_path).exists() {
-            let mut file_out = fs::File::create(file_out_path).expect("Failed to create file.");
-            let content = file_in.data.as_ref();
-            file_out.write_all(content).expect("Failed to write template content to file.");
+        if !dot_xylo_only || file.as_ref().starts_with(".xylo") {
+            let file_in = Asset::get(file.as_ref()).unwrap();
+            let file_out_path = Path::new(if file.as_ref() == ".ignore" { ".gitignore" } else { file.as_ref() });
+            if let Some(dir) = file_out_path.parent() {
+                fs::create_dir_all(dir).unwrap();
+            }
+            
+            if !Path::new(file_out_path).exists() {
+                let mut file_out = fs::File::create(file_out_path).expect("Failed to create file.");
+                let content = file_in.data.as_ref();
+                file_out.write_all(content).expect("Failed to write template content to file.");
+            }
         }
     }
 }
@@ -45,14 +47,14 @@ pub fn run_new(name: &String) {
     let original_dir = env::current_dir().expect("Could not get current directory.");
     env::set_current_dir(Path::new(name)).expect("Could not change current directory.");
 
-    copy_template_files();
+    copy_template_files(false);
     // Restore original directory
     env::set_current_dir(original_dir).expect("Could not change current directory.");
 }
 
 pub fn run_dev() {
     if Path::new("xylo.yaml").exists() {
-        copy_template_files();
+        copy_template_files(true);
         let original_dir = env::current_dir().expect("Could not get current directory.");
 
         // Copy all files for frontend/backend into the .xylo dir
