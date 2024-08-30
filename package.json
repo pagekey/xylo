@@ -1,6 +1,6 @@
 {
     "name": "pagekey-xylo",
-    "version": "0.3.2",
+    "version": "0.3.3",
     "description": "Self-hosted app creation kit.",
     "main": "index.js",
     "scripts": {

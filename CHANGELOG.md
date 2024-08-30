@@ -1,3 +1,7 @@
+## v0.3.3
+
+- fix: Copy only .xylo contents on run dev (32554bc0)
+
 ## v0.3.2
 
 - fix: Allow any origin with CORS (abfc4239)
