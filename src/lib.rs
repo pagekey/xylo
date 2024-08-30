@@ -14,6 +14,8 @@ use std::sync::Arc;
 use std::time::Duration;
 use std::thread;
 
+use warp::Filter;
+
 #[derive(RustEmbed)]
 #[folder="templates/"]
 struct Asset;
@@ -29,13 +31,29 @@ fn copy_template_files(dot_xylo_only: bool) {
                 fs::create_dir_all(dir).unwrap();
             }
             
-            if !Path::new(file_out_path).exists() {
-                let mut file_out = fs::File::create(file_out_path).expect("Failed to create file.");
-                let content = file_in.data.as_ref();
-                file_out.write_all(content).expect("Failed to write template content to file.");
-            }
+            // if !Path::new(file_out_path).exists() {
+            let mut file_out = fs::File::create(file_out_path).expect("Failed to create file.");
+            let content = file_in.data.as_ref();
+            file_out.write_all(content).expect("Failed to write template content to file.");
+            // }
         }
     }
+}
+
+#[tokio::main]
+pub async fn start() {
+    println!("Starting backend.");
+    let cors = warp::cors()
+        .allow_any_origin();
+
+    let hello = warp::path::end()
+        .map(|| warp::reply::html("hello world2"))
+        .with(cors);
+
+    // Start the warp server
+    warp::serve(hello)
+        .run(([127, 0, 0, 1], 5000))
+        .await;
 }
 
 pub fn run_new(name: &String) {

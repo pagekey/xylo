@@ -6,5 +6,5 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-warp = "0.3"
-tokio = { version = "1", features = ["full"] }
+# xylo = "^0.3.1"
+pagekey-xylo = { path="/home/steve/repos/xylo" }
