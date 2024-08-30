@@ -1,3 +1,7 @@
+## v0.4.0
+
+- feat: Move warp to start method that you can call (c6e7ab98)
+
 ## v0.3.3
 
 - fix: Copy only .xylo contents on run dev (32554bc0)
