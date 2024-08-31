@@ -1,6 +1,7 @@
 pub mod cli;
 pub mod system_caller;
 
+use serde::Serialize;
 use std::env;
 use std::fs;
 use std::io::Write;
@@ -40,11 +41,14 @@ fn copy_template_files(dot_xylo_only: bool) {
     }
 }
 
-pub struct Route {
+pub struct Route<T>
+where
+    T: Serialize + 'static,
+{
     pub path: String,
-    pub handler: Arc<dyn Fn() -> String + Send + Sync>,
+    pub handler: Arc<dyn Fn() -> T + Send + Sync>,
 }
-impl Route {
+impl<T: serde::Serialize> Route<T> {
     // Convert the Route into a warp filter
     pub fn to_warp(&self) -> impl warp::Filter<Extract = (impl warp::Reply,), Error = warp::Rejection> + Clone {
         let path = self.path.clone();
@@ -63,13 +67,13 @@ impl Route {
             .and(warp::get())
             .map(move || {
                 let response = handler();
-                warp::reply::html(response)
+                warp::reply::json(&response)
             })
             .with(cors)
     }
 }
 #[tokio::main]
-pub async fn start(routes: Vec<Route>) {
+pub async fn start<T: serde::Serialize>(routes: Vec<Route<T>>) {
     println!("Starting backend.");
 
     if let Some((first_route, other_routes)) = routes.split_first() {

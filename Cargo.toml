@@ -15,6 +15,7 @@ edition = "2021"
 [dependencies]
 ctrlc = "3.4.4"
 rust-embed = "8.4.0"
+serde = { version = "1.0.209", features = ["derive"] }
 structopt = "0.3.26"
 walkdir = "2.5.0"
 warp = "0.3"
