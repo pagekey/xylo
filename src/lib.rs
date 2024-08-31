@@ -51,7 +51,7 @@ impl Route {
         let handler = Arc::clone(&self.handler);
         let cors = warp::cors().allow_any_origin();
 
-        let path_filter = if self.path == "/" {
+        let path_filter = if self.path == "index" {
             warp::path::end().boxed()
         } else {
             warp::path(path)
@@ -69,15 +69,23 @@ impl Route {
     }
 }
 #[tokio::main]
-pub async fn start(route: Route) {
+pub async fn start(routes: Vec<Route>) {
     println!("Starting backend.");
 
-    let warp_route = route.to_warp();
+    if let Some((first_route, other_routes)) = routes.split_first() {
+        // Start folding with the first route
+        let combined_route = other_routes.iter()
+            .fold(first_route.to_warp().boxed(), |acc, route| {
+                acc.or(route.to_warp().boxed()).unify().boxed()
+            });
 
-    // Start the warp server
-    warp::serve(warp_route)
-        .run(([127, 0, 0, 1], 5000))
-        .await;
+        // Start the warp server
+        warp::serve(combined_route)
+            .run(([127, 0, 0, 1], 5000))
+            .await;
+    } else {
+        eprintln!("No routes provided!");
+    }
 }
 
 pub fn run_new(name: &String) {
