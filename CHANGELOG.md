@@ -1,3 +1,7 @@
+## v0.5.0
+
+- feat: Add ability to dynamically change route text (82d31101)
+
 ## v0.4.0
 
 - feat: Move warp to start method that you can call (c6e7ab98)
