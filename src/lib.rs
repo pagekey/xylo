@@ -79,8 +79,13 @@ pub async fn start(routes: Vec<Route>) {
                 acc.or(route.to_warp().boxed()).unify().boxed()
             });
 
+        let not_found = warp::any()
+            .map(|| warp::reply::html("404: Not Found"));
+
+        let final_route = combined_route.or(not_found);
+
         // Start the warp server
-        warp::serve(combined_route)
+        warp::serve(final_route)
             .run(([127, 0, 0, 1], 5000))
             .await;
     } else {
