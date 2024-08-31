@@ -40,9 +40,14 @@ fn copy_template_files(dot_xylo_only: bool) {
     }
 }
 
+#[derive(Debug)]
+pub struct Route {
+    pub path:String,
+    pub handler: fn() -> String,
+}
 #[tokio::main]
-pub async fn start(func: fn() -> String) {
-    let arc = std::sync::Arc::new(func);
+pub async fn start(route: Route) {
+    let arc = std::sync::Arc::new(route.handler);
     println!("Starting backend.");
     let cors = warp::cors()
         .allow_any_origin();
