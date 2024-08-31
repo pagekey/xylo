@@ -40,27 +40,42 @@ fn copy_template_files(dot_xylo_only: bool) {
     }
 }
 
-#[derive(Debug)]
 pub struct Route {
-    pub path:String,
-    pub handler: fn() -> String,
+    pub path: String,
+    pub handler: Arc<dyn Fn() -> String + Send + Sync>,
+}
+impl Route {
+    // Convert the Route into a warp filter
+    pub fn to_warp(&self) -> impl warp::Filter<Extract = (impl warp::Reply,), Error = warp::Rejection> + Clone {
+        let path = self.path.clone();
+        let handler = Arc::clone(&self.handler);
+        let cors = warp::cors().allow_any_origin();
+
+        let path_filter = if self.path == "/" {
+            warp::path::end().boxed()
+        } else {
+            warp::path(path)
+                .and(warp::path::end())
+                .boxed()
+        };
+        
+        path_filter
+            .and(warp::get())
+            .map(move || {
+                let response = handler();
+                warp::reply::html(response)
+            })
+            .with(cors)
+    }
 }
 #[tokio::main]
 pub async fn start(route: Route) {
-    let arc = std::sync::Arc::new(route.handler);
     println!("Starting backend.");
-    let cors = warp::cors()
-        .allow_any_origin();
 
-    let hello = warp::path::end()
-        .map(move || {
-            let response = (arc)();
-            warp::reply::html(response)
-        })
-        .with(cors);
+    let warp_route = route.to_warp();
 
     // Start the warp server
-    warp::serve(hello)
+    warp::serve(warp_route)
         .run(([127, 0, 0, 1], 5000))
         .await;
 }
