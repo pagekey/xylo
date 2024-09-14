@@ -8,4 +8,6 @@ pages:
     component: {{ cookiecutter.name }}-frontend:AboutPage
     path: /about
 routes:
-  - abc
+  info:
+    handler: {{ cookiecutter.name_with_underscores }}_backend.info:handle_info
+    path: /

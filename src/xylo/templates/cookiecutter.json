@@ -1,3 +1,4 @@
 {
-    "name": "my-app"
+    "name": "my-app",
+    "name_with_underscores": "my_app"
 }

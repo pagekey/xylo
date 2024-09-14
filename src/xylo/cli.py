@@ -21,7 +21,7 @@ def new():
         name = "my-app"
     cookiecutter(
         str(TEMPLATES_DIR),
-        extra_context={"name": name},
+        extra_context={"name": name, "name_with_underscores": name.replace("-", "_")},
         no_input=True,
     )
     ignore_file = Path(name) / ".ignore"
@@ -93,6 +93,21 @@ def generate_code():
             f.write("export default function() {\n")
             f.write(f"    return <{function} />;\n")
             f.write("}\n")
+    server_file = Path(".xylo") / "backend" / "server.py"
+    os.makedirs(server_file.parent, exist_ok=True)
+    with open(server_file, 'w') as f:
+        f.write("from flask import Flask\n")
+        f.write("from flask_cors import CORS\n")
+        f.write("app = Flask(__name__)\n")
+        f.write("CORS(app)\n")
+        for name, route in config.routes.items():
+            module, function = route.handler.split(":")
+            f.write(f"from {module} import {function}\n")
+            f.write(f"@app.route('{route.path}')\n")
+            f.write(f"def route_{name.replace('-', '_')}():\n")
+            f.write(f"    {function}()\n")
+        f.write("if __name__ == '__main__':\n")
+        f.write("    app.run(debug=True)")
 
 
 def clean_xylo():

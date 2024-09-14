@@ -8,11 +8,16 @@ class Page(BaseModel):
     path: str
 
 
+class Route(BaseModel):
+    handler: str
+    path: str
+
+
 class Config(BaseModel):
     name: str
     version: str
     pages: Dict[str, Page]
-    routes: List[str]
+    routes: Dict[str, Route]
 
 
 def load_config(file_path: str) -> Config:
