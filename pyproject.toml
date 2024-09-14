@@ -1,0 +1,19 @@
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+name = "xylo"
+version = "0.1.0"
+description = "App framework"
+authors = ["Steve G <steve@pagekey.io>"]
+packages = [{ include = "xylo", from="src" }]
+
+[tool.poetry.scripts]
+xylo = "xylo.cli:cli_entrypoint"
+
+[tool.poetry.dependencies]
+python = "^3.8"
+
+[tool.poetry.dev-dependencies]
+ruff = "^0.6.5"
