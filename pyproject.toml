@@ -14,6 +14,7 @@ xylo = "xylo.cli:cli_entrypoint"
 
 [tool.poetry.dependencies]
 python = "^3.8"
+click = "^8.1.7"
 
 [tool.poetry.dev-dependencies]
 ruff = "^0.6.5"
