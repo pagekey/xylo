@@ -16,6 +16,8 @@ xylo = "xylo.cli:cli_entrypoint"
 python = "^3.8"
 click = "^8.1.7"
 cookiecutter = "^2.6.0"
+pyyaml = "^6.0.2"
+pydantic = "^2.9.1"
 
 [tool.poetry.dev-dependencies]
 ruff = "^0.6.5"
