@@ -115,7 +115,7 @@ def generate_code():
             f.write(f"from {module} import {function}\n")
             f.write(f"@app.route('{route.path}')\n")
             f.write(f"def route_{name.replace('-', '_')}():\n")
-            f.write(f"    {function}()\n")
+            f.write(f"    return {function}()\n")
         f.write("if __name__ == '__main__':\n")
         f.write("    app.run(debug=True)")
 

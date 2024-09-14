@@ -1,2 +1,2 @@
 def handle_info():
-    print("Hello world from backend")
+    return "Hello world from backend"
