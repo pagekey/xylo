@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+import threading
 import click
 from cookiecutter.main import cookiecutter
 from xylo.config import load_config
@@ -30,10 +31,23 @@ def new():
 @xylo.command()
 def dev():
     # check if nextjs app generated yet
-    config = load_config("xylo.yaml")
-    print("Config: ",config)
     if not Path(".xylo").exists():
         clean_xylo()
+    t1 = threading.Thread(target=frontend_thread, args=())
+    t1.start()
+
+    t2 = threading.Thread(target=backend_thread, args=())
+    t2.start()
+
+    t1.join()
+    t2.join()
+
+
+def backend_thread():
+    print("running backend...")
+
+def frontend_thread():
+    config = load_config("xylo.yaml")
     original_dir = os.getcwd()
     generate_code()
     os.chdir("xylo/frontend")
@@ -48,13 +62,16 @@ def dev():
     os.system("npm run dev")
     os.chdir(original_dir)
 
+
 @xylo.command()
 def build():
     print("build")
 
+
 @xylo.command()
 def clean():
     clean_xylo()
+
 
 def generate_code():
     config = load_config("xylo.yaml")
@@ -68,6 +85,7 @@ def generate_code():
             f.write("export default function() {\n")
             f.write(f"    return <{function} />;\n")
             f.write("}\n")
+
 
 def clean_xylo():
     os.system("rm -rf .xylo")
