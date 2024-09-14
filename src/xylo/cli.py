@@ -1,6 +1,6 @@
 from pathlib import Path
 import click
-
+from cookiecutter.main import cookiecutter
 
 @click.group()
 def xylo():
@@ -9,9 +9,8 @@ def xylo():
 @xylo.command()
 def new():
     print("new")
-    templates = Path(__file__).parent / "templates" / "frontend"
-    for file in templates.iterdir():
-        print(file)
+    templates_dir = Path(__file__).parent / "templates"
+    cookiecutter(str(templates_dir))
 
 @xylo.command()
 def dev():
