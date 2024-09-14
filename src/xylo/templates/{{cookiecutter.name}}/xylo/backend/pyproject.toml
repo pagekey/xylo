@@ -1,0 +1,16 @@
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+name = "{{cookiecutter.name}}-backend"
+version = "0.1.0"
+description = "Xylo app"
+authors = []
+packages = [{ include = "{{cookiecutter.name_with_underscores}}_backend", from="src" }]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+xylo = "*"
+
+[tool.poetry.dev-dependencies]

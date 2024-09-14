@@ -4,3 +4,4 @@ output/
 *.tsbuildinfo
 *.tgz
 tmp/
+dist/

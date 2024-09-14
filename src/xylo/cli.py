@@ -12,7 +12,7 @@ TEMPLATES_DIR = Path(__file__).parent / "templates"
 
 @click.group()
 def xylo():
-    """Top-level CLI function."""
+    """Self-hosted application toolkit."""
 
 @xylo.command()
 def new():
@@ -42,16 +42,26 @@ def dev():
     backend_process.start()
 
     # Block waiting for the processes.
-    frontend_process.join()
-    backend_process.join()
+    try:
+        frontend_process.join()
+        backend_process.join()
+    except KeyboardInterrupt:
+        frontend_process.kill()
+        backend_process.kill()
+    print("Killed background processes.")
 
 
 def run_backend():
     print("running backend...")
     config = load_config("xylo.yaml")
     original_dir = os.getcwd()
+    generate_code()
+    if not Path(".xylo/backend/venv").exists():
+        os.system("python3 -m venv .xylo/backend/venv")
+    os.system(".xylo/backend/venv/bin/pip install pip --upgrade")
+    os.system(".xylo/backend/venv/bin/pip install -e xylo/backend")
     os.chdir(".xylo/backend")
-    os.system("python3 server.py")
+    os.system("venv/bin/python3 server.py")
 
 def run_frontend():
     config = load_config("xylo.yaml")
