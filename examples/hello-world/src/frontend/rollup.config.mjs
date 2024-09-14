@@ -5,6 +5,11 @@ export default {
     output: {
         dir: 'dist',
         format: 'cjs',
+        sourcemap: true,
+        globals: {
+          react: 'React',
+        },
     },
     plugins: [typescript()],
+    external: ['react', 'react-dom'],
 };
