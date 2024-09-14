@@ -1,5 +1,5 @@
 import foo from './foo.js'
 
 export default function() {
-    console.log(foo);
+    return <div>foo: {foo}</div>
 }
