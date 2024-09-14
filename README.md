@@ -7,7 +7,7 @@ Self-hosted app creation kit.
 1. Generate a project:
 
 ```bash
-xylo new myproject
+xylo new
 ```
 
 2. Enter the project:
@@ -61,4 +61,3 @@ make install
 ### Uninstalling Local Installation
 
 Run `make uninstall`.
-

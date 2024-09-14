@@ -1,12 +1,4 @@
-file_replacers:
-  - name: Cargo.toml
-    type: toml
-    key: package.version
-    format: "%M.%m.%p"
-  - name: package.json
-    type: json
-    key: version
-    format: "%M.%m.%p"
+file_replacers: []
 integrations:
   create_release:
     github:
