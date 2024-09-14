@@ -18,6 +18,8 @@ click = "^8.1.7"
 cookiecutter = "^2.6.0"
 pyyaml = "^6.0.2"
 pydantic = "^2.9.1"
+flask = "^3.0.3"
+flask-cors = "^5.0.0"
 
 [tool.poetry.dev-dependencies]
 ruff = "^0.6.5"

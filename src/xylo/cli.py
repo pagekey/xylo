@@ -4,6 +4,7 @@ import threading
 import click
 from cookiecutter.main import cookiecutter
 from xylo.config import load_config
+import multiprocessing
 
 
 TEMPLATES_DIR = Path(__file__).parent / "templates"
@@ -33,20 +34,26 @@ def dev():
     # check if nextjs app generated yet
     if not Path(".xylo").exists():
         clean_xylo()
-    t1 = threading.Thread(target=frontend_thread, args=())
-    t1.start()
 
-    t2 = threading.Thread(target=backend_thread, args=())
-    t2.start()
+    # Start separate processes to manage front/backend.
+    frontend_process = multiprocessing.Process(target=run_frontend, args=(), kwargs={})
+    frontend_process.start()
+    backend_process = multiprocessing.Process(target=run_backend, args=(), kwargs={})
+    backend_process.start()
 
-    t1.join()
-    t2.join()
+    # Block waiting for the processes.
+    frontend_process.join()
+    backend_process.join()
 
 
-def backend_thread():
+def run_backend():
     print("running backend...")
+    config = load_config("xylo.yaml")
+    original_dir = os.getcwd()
+    os.chdir(".xylo/backend")
+    os.system("python3 server.py")
 
-def frontend_thread():
+def run_frontend():
     config = load_config("xylo.yaml")
     original_dir = os.getcwd()
     generate_code()
@@ -80,6 +87,7 @@ def generate_code():
         os.makedirs(page_file.parent, exist_ok=True)
         with open(page_file, 'w') as f:
             module, function = page.component.split(":")
+            f.write('"use client"\n')
             import_stmt = "import {" + function + "}" + f" from '{module}';\n"
             f.write(import_stmt)
             f.write("export default function() {\n")
