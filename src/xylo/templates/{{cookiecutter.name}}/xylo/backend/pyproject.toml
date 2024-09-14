@@ -11,6 +11,6 @@ packages = [{ include = "{{cookiecutter.name_with_underscores}}_backend", from="
 
 [tool.poetry.dependencies]
 python = "^3.8"
-xylo = ">=0.3.0"
+xylo = ">=0.4.0"
 
 [tool.poetry.dev-dependencies]
