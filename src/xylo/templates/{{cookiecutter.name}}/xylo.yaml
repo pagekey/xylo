@@ -1,6 +1,6 @@
 name: {{ cookiecutter.name }}
 version: 0.1.0
 pages:
-  - abc
+  - MyPage
 routes:
   - abc

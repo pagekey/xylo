@@ -35,6 +35,7 @@ def dev():
     if not Path(".xylo").exists():
         clean_xylo()
     original_dir = os.getcwd()
+    generate_code()
     os.chdir("xylo/frontend")
     os.system("npm i")
     os.system("npm run build")
@@ -54,6 +55,16 @@ def build():
 @xylo.command()
 def clean():
     clean_xylo()
+
+def generate_code():
+    config = load_config("xylo.yaml")
+    for route in config.pages:
+        with open(".xylo/frontend/app/page.tsx", 'w') as f:
+            import_stmt = "import {" + route + "}" + f" from '{config.name}-frontend';\n"
+            f.write(import_stmt)
+            f.write("export default function() {\n")
+            f.write(f"    return <{route} />;\n")
+            f.write("}\n")
 
 def clean_xylo():
     os.system("rm -rf .xylo")

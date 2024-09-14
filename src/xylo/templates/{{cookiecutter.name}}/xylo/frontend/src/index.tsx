@@ -1,10 +1,10 @@
 import React from 'react';
 
 
-export default function() {
+export const MyPage = function() {
     return (
         <div>
             Hello Xylo
         </div>
     )
-}
+};
