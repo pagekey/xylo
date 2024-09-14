@@ -2,8 +2,9 @@
   "name": "frontend",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "dist/index.js",
   "scripts": {
+    "build": "rollup -c rollup.config.mjs",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -16,5 +17,8 @@
     "@rollup/plugin-typescript": "^11.1.6",
     "rollup": "^4.21.3",
     "tslib": "^2.7.0"
-  }
+  },
+  "files": [
+    "dist"
+  ]
 }
