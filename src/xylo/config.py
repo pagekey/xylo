@@ -1,12 +1,17 @@
-from typing import List
+from typing import Dict, List
 from pydantic import BaseModel
 import yaml
+
+
+class Page(BaseModel):
+    component: str
+    path: str
 
 
 class Config(BaseModel):
     name: str
     version: str
-    pages: List[str]
+    pages: Dict[str, Page]
     routes: List[str]
 
 

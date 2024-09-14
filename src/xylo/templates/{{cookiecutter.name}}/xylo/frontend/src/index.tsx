@@ -1,10 +1,18 @@
 import React from 'react';
 
 
-export const MyPage = function() {
+export const HomePage = function() {
     return (
         <div>
-            Hello Xylo
+            HOME! Hello Xylo. <a href="/about">About page here</a>
+        </div>
+    )
+};
+
+export const AboutPage = function() {
+    return (
+        <div>
+            ABOUT! Hello Xylo. <a href="/">Home page here.</a>
         </div>
     )
 };

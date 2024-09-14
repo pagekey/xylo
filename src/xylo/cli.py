@@ -58,12 +58,15 @@ def clean():
 
 def generate_code():
     config = load_config("xylo.yaml")
-    for route in config.pages:
-        with open(".xylo/frontend/app/page.tsx", 'w') as f:
-            import_stmt = "import {" + route + "}" + f" from '{config.name}-frontend';\n"
+    for name, page in config.pages.items():
+        page_file = Path(".xylo") / "frontend" / "app" / Path("./" + page.path) / "page.tsx"
+        os.makedirs(page_file.parent, exist_ok=True)
+        with open(page_file, 'w') as f:
+            module, function = page.component.split(":")
+            import_stmt = "import {" + function + "}" + f" from '{module}';\n"
             f.write(import_stmt)
             f.write("export default function() {\n")
-            f.write(f"    return <{route} />;\n")
+            f.write(f"    return <{function} />;\n")
             f.write("}\n")
 
 def clean_xylo():

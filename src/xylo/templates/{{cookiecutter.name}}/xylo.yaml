@@ -1,6 +1,11 @@
 name: {{ cookiecutter.name }}
 version: 0.1.0
 pages:
-  - MyPage
+  home:
+    component: {{ cookiecutter.name }}-frontend:HomePage
+    path: / 
+  about:
+    component: {{ cookiecutter.name }}-frontend:AboutPage
+    path: /about
 routes:
   - abc
