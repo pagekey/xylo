@@ -1,4 +1,12 @@
-file_replacers: []
+file_replacers:
+  - type: toml
+    name: pyproject.toml
+    key: tool.poetry.version
+    format: "%M.%m.%p"
+  - type: toml
+    name: "src/xylo/templates/{{cookiecutter.name}}/xylo/backend/pyproject.toml"
+    key: tool.poetry.dependencies.xylo
+    format: ">=%M.%m.%p"
 integrations:
   create_release:
     github:
