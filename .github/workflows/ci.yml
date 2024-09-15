@@ -21,8 +21,9 @@ jobs:
         run: echo coming soon
 
   mirror:
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
-    needs: [test, version]
+    needs: [lint, test, version]
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -33,6 +34,6 @@ jobs:
           GITLAB_USER: ${{ secrets.GITLAB_USER }}
           GITLAB_TOKEN: ${{ secrets.GITLAB_TOKEN }}
         run: |
-          git remote add gitlab https://$GITLAB_USER:$GITLAB_TOKEN@gitlab.com/pagekey/xylo.git
+          git remote add gitlab https://$GITLAB_USER:$GITLAB_TOKEN@gitlab.com/pagekey/semver.git
           git remote remove origin
-          git push --mirror gitlab
+          git push gitlab main
