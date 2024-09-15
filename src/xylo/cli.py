@@ -15,10 +15,13 @@ TEMPLATES_DIR = Path(__file__).parent / "templates"
 
 class FrontendWatcher(FileSystemEventHandler):
     def on_modified(self, event):
-        if not event.is_directory:
-            print(f'Modified: {event.src_path}')
-            subprocess.run(['npm', 'run', 'build'], cwd='xylo/frontend')
-            print("built")
+        try:
+            if not event.is_directory:
+                print(f'Modified: {event.src_path}')
+                subprocess.run(['npm', 'run', 'build'], cwd='xylo/frontend')
+                print("built")
+        except:
+            print("Warning: error occurred in frontend watcher")
 
     def on_created(self, event):
         if not event.is_directory:
