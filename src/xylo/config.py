@@ -11,6 +11,7 @@ class Page(BaseModel):
 class Route(BaseModel):
     handler: str
     path: str
+    method: str
 
 
 class Config(BaseModel):

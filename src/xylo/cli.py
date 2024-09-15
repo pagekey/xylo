@@ -106,16 +106,24 @@ def generate_code():
     server_file = Path(".xylo") / "backend" / "server.py"
     os.makedirs(server_file.parent, exist_ok=True)
     with open(server_file, 'w') as f:
-        f.write("from flask import Flask\n")
+        f.write("from flask import Flask, request\n")
         f.write("from flask_cors import CORS\n")
         f.write("app = Flask(__name__)\n")
         f.write("CORS(app)\n")
         for name, route in config.routes.items():
             module, function = route.handler.split(":")
-            f.write(f"from {module} import {function}\n")
-            f.write(f"@app.route('{route.path}')\n")
+            if route.method:
+                method_str = f", methods=['{route.method}']"
+            else:
+                method_str = ""
+            f.write(f"import {module}\n")
+            f.write(f"@app.route('{route.path}'{method_str})\n")
             f.write(f"def route_{name.replace('-', '_')}():\n")
-            f.write(f"    return {function}()\n")
+            f.write(f"    if request.is_json:\n")
+            f.write(f"        body = request.get_json()\n")
+            f.write(f"    else:\n")
+            f.write("        body = {}\n")
+            f.write(f"    return {module}.{function}(body)\n")
         f.write("if __name__ == '__main__':\n")
         f.write("    app.run(debug=True)")
 
