@@ -13,13 +13,14 @@ packages = [{ include = "xylo", from="src" }]
 xylo = "xylo.cli:cli_entrypoint"
 
 [tool.poetry.dependencies]
-python = "^3.8"
+python = ">=3.10,<4.0"
 click = "^8.1.7"
 cookiecutter = "^2.6.0"
 pyyaml = "^6.0.2"
 pydantic = "^2.9.1"
 flask = "^3.0.3"
 flask-cors = "^5.0.0"
+watchdog = "^5.0.2"
 
 [tool.poetry.dev-dependencies]
 ruff = "^0.6.5"

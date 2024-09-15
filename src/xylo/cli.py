@@ -1,13 +1,32 @@
 import os
 from pathlib import Path
+import subprocess
 import threading
 import click
 from cookiecutter.main import cookiecutter
 from xylo.config import load_config
 import multiprocessing
+from watchdog.observers import Observer
+from watchdog.events import FileSystemEventHandler
 
 
 TEMPLATES_DIR = Path(__file__).parent / "templates"
+
+
+class FrontendWatcher(FileSystemEventHandler):
+    def on_modified(self, event):
+        if not event.is_directory:
+            print(f'Modified: {event.src_path}')
+            subprocess.run(['npm', 'run', 'build'], cwd='xylo/frontend')
+            print("built")
+
+    def on_created(self, event):
+        if not event.is_directory:
+            print(f'Created: {event.src_path}')
+    
+    def on_deleted(self, event):
+        if not event.is_directory:
+            print(f'Deleted: {event.src_path}')
 
 
 @click.group()
@@ -41,6 +60,13 @@ def dev():
     backend_process = multiprocessing.Process(target=run_backend, args=(), kwargs={})
     backend_process.start()
 
+    # Watch for changes to frontend
+    path = "xylo/frontend/src"
+    event_handler = FrontendWatcher()
+    observer = Observer()
+    observer.schedule(event_handler, path, recursive=True)
+    observer.start()
+
     # Block waiting for the processes.
     try:
         frontend_process.join()
@@ -48,6 +74,8 @@ def dev():
     except KeyboardInterrupt:
         frontend_process.kill()
         backend_process.kill()
+        observer.stop()
+    observer.join()
     print("Killed background processes.")
 
 
