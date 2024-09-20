@@ -1,0 +1,13 @@
+name: {{ cookiecutter.name }}
+version: 0.1.0
+pages:
+  home:
+    component: {{ cookiecutter.name }}-frontend:HomePage
+    path: / 
+  about:
+    component: {{ cookiecutter.name }}-frontend:AboutPage
+    path: /about
+routes:
+  info:
+    handler: {{ cookiecutter.name_with_underscores }}_backend.info:handle_info
+    path: /

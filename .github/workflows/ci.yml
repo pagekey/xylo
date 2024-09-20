@@ -11,22 +11,17 @@ jobs:
     uses: pagekey/semver/.github/workflows/semver.yml@main  
 
   test:
-    name: Cargo test
+    name: Python test
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
       
-      - name: Install Rust toolchain
-        uses: dtolnay/rust-toolchain@master
-        id: rust-toolchain
-        with:
-          toolchain: stable
-      
-      - name: Cargo test
-        run: cargo test
+      - name: Python test
+        run: echo coming soon
 
   mirror:
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     needs: [test, version]
     steps:
@@ -39,6 +34,6 @@ jobs:
           GITLAB_USER: ${{ secrets.GITLAB_USER }}
           GITLAB_TOKEN: ${{ secrets.GITLAB_TOKEN }}
         run: |
-          git remote add gitlab https://$GITLAB_USER:$GITLAB_TOKEN@gitlab.com/pagekey/xylo.git
+          git remote add gitlab https://$GITLAB_USER:$GITLAB_TOKEN@gitlab.com/pagekey/semver.git
           git remote remove origin
-          git push --mirror gitlab
+          git push gitlab main
