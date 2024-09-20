@@ -1,3 +1,7 @@
+## v0.6.0
+
+- feat: Rewrite everything in Python (#4) (84c10d90)
+
 ## v0.5.0
 
 - feat: Add ability to dynamically change route text (82d31101)

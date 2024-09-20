@@ -1,13 +1,15 @@
 [build-system]
-requires = ["poetry-core"]
+requires = [ "poetry-core",]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "xylo"
-version = "0.5.0"
+version = "0.6.0"
 description = "App framework"
-authors = ["Steve G <steve@pagekey.io>"]
-packages = [{ include = "xylo", from="src" }]
+authors = [ "Steve G <steve@pagekey.io>",]
+[[tool.poetry.packages]]
+include = "xylo"
+from = "src"
 
 [tool.poetry.scripts]
 xylo = "xylo.cli:cli_entrypoint"
