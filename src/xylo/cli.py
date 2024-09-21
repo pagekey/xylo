@@ -2,7 +2,6 @@ import os
 from pathlib import Path
 import subprocess
 import sys
-import threading
 import click
 from cookiecutter.main import cookiecutter
 from xylo.config import load_config
