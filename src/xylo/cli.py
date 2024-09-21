@@ -1,6 +1,7 @@
 import os
 from pathlib import Path
 import subprocess
+import sys
 import threading
 import click
 from cookiecutter.main import cookiecutter
@@ -58,9 +59,9 @@ def dev():
         clean_xylo()
 
     # Start separate processes to manage front/backend.
-    frontend_process = multiprocessing.Process(target=run_frontend, args=(), kwargs={})
+    frontend_process = multiprocessing.Process(target=dev_frontend, args=(), kwargs={})
     frontend_process.start()
-    backend_process = multiprocessing.Process(target=run_backend, args=(), kwargs={})
+    backend_process = multiprocessing.Process(target=dev_backend, args=(), kwargs={})
     backend_process.start()
 
     # Watch for changes to frontend
@@ -82,7 +83,7 @@ def dev():
     print("Killed background processes.")
 
 
-def run_backend():
+def dev_backend():
     print("running backend...")
     config = load_config("xylo.yaml")
     original_dir = os.getcwd()
@@ -94,7 +95,7 @@ def run_backend():
     os.chdir(".xylo/backend")
     os.system("venv/bin/python3 server.py")
 
-def run_frontend():
+def dev_frontend():
     config = load_config("xylo.yaml")
     original_dir = os.getcwd()
     generate_code()
@@ -195,3 +196,31 @@ def clean_xylo():
 
 def cli_entrypoint():
     xylo()
+
+
+@xylo.group()
+def run():
+    """Run a Xylo app component in production."""
+
+
+from http.server import HTTPServer, SimpleHTTPRequestHandler
+
+@run.command()
+def frontend():
+    """Serve frontend static files."""
+    if not Path("index.html").exists():
+        print("You're not in a valid Xylo frontend build. Please cd to the dist/frontend directory.")
+        sys.exit(1)
+    server_address = ('', 8000)
+    httpd = HTTPServer(server_address, SimpleHTTPRequestHandler)
+    print(f"Serving on port {server_address[1]}...")
+    httpd.serve_forever()
+
+@run.command()
+def backend():
+    """Run the backend."""
+    if not Path("src/server.py").exists():
+        print("You're not in a valid Xylo backend build. Please cd to the dist/backend directory.")
+        sys.exit(1)
+    os.system("poetry install")
+    os.system("poetry run python src/server.py")
