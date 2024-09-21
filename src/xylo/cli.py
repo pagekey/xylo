@@ -113,7 +113,25 @@ def run_frontend():
 
 @xylo.command()
 def build():
-    print("build")
+    clean_xylo()
+    build_frontend()
+
+
+def build_frontend():
+    config = load_config("xylo.yaml")
+    original_dir = os.getcwd()
+    generate_code()
+    os.chdir("xylo/frontend")
+    os.system("npm i")
+    os.system("npm run build")
+    os.system("npm link")
+    os.chdir(original_dir)
+    os.chdir(".xylo/frontend")
+    os.system("npm i")
+    os.system(f"npm link {config.name}-frontend")
+    os.system("npm run build")
+    os.system("mkdir ../../dist")
+    os.system("mv out ../../dist/frontend")
 
 
 @xylo.command()
@@ -131,7 +149,7 @@ def generate_code():
             f.write('"use client"\n')
             import_stmt = "import {" + function + "}" + f" from '{module}';\n"
             f.write(import_stmt)
-            f.write("export default function() {\n")
+            f.write(f"export default function {function}GeneratedPage()" + " {\n")
             f.write(f"    return <{function} />;\n")
             f.write("}\n")
     server_file = Path(".xylo") / "backend" / "server.py"
