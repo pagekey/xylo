@@ -114,13 +114,14 @@ def run_frontend():
 @xylo.command()
 def build():
     clean_xylo()
+    generate_code()
     build_frontend()
+    build_backend()
 
 
 def build_frontend():
     config = load_config("xylo.yaml")
     original_dir = os.getcwd()
-    generate_code()
     os.chdir("xylo/frontend")
     os.system("npm i")
     os.system("npm run build")
@@ -132,6 +133,15 @@ def build_frontend():
     os.system("npm run build")
     os.system("mkdir ../../dist")
     os.system("mv out ../../dist/frontend")
+    os.chdir(original_dir)
+
+
+def build_backend():
+    # config = load_config("xylo.yaml")
+    # original_dir = os.getcwd()
+    os.system("cp -r xylo/backend dist/backend")
+    os.system("rm -rf dist/backend/.venv")
+    os.system("cp .xylo/backend/server.py dist/backend/src")
 
 
 @xylo.command()
