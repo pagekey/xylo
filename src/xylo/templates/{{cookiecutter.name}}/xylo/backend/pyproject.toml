@@ -13,6 +13,6 @@ from = "src"
 
 [tool.poetry.dependencies]
 python = "^3.8"
-xylo = ">=0.6.0"
+xylo = ">=0.7.0"
 
 [tool.poetry.dev-dependencies]
