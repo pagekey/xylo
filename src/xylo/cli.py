@@ -1,7 +1,7 @@
 import os
 from pathlib import Path
 import subprocess
-import threading
+import sys
 import click
 from cookiecutter.main import cookiecutter
 from xylo.config import load_config
@@ -58,9 +58,9 @@ def dev():
         clean_xylo()
 
     # Start separate processes to manage front/backend.
-    frontend_process = multiprocessing.Process(target=run_frontend, args=(), kwargs={})
+    frontend_process = multiprocessing.Process(target=dev_frontend, args=(), kwargs={})
     frontend_process.start()
-    backend_process = multiprocessing.Process(target=run_backend, args=(), kwargs={})
+    backend_process = multiprocessing.Process(target=dev_backend, args=(), kwargs={})
     backend_process.start()
 
     # Watch for changes to frontend
@@ -82,7 +82,7 @@ def dev():
     print("Killed background processes.")
 
 
-def run_backend():
+def dev_backend():
     print("running backend...")
     config = load_config("xylo.yaml")
     original_dir = os.getcwd()
@@ -94,7 +94,7 @@ def run_backend():
     os.chdir(".xylo/backend")
     os.system("venv/bin/python3 server.py")
 
-def run_frontend():
+def dev_frontend():
     config = load_config("xylo.yaml")
     original_dir = os.getcwd()
     generate_code()
@@ -113,7 +113,35 @@ def run_frontend():
 
 @xylo.command()
 def build():
-    print("build")
+    clean_xylo()
+    generate_code()
+    build_frontend()
+    build_backend()
+
+
+def build_frontend():
+    config = load_config("xylo.yaml")
+    original_dir = os.getcwd()
+    os.chdir("xylo/frontend")
+    os.system("npm i")
+    os.system("npm run build")
+    os.system("npm link")
+    os.chdir(original_dir)
+    os.chdir(".xylo/frontend")
+    os.system("npm i")
+    os.system(f"npm link {config.name}-frontend")
+    os.system("npm run build")
+    os.system("mkdir ../../dist")
+    os.system("mv out ../../dist/frontend")
+    os.chdir(original_dir)
+
+
+def build_backend():
+    # config = load_config("xylo.yaml")
+    # original_dir = os.getcwd()
+    os.system("cp -r xylo/backend dist/backend")
+    os.system("rm -rf dist/backend/.venv")
+    os.system("cp .xylo/backend/server.py dist/backend/src")
 
 
 @xylo.command()
@@ -131,7 +159,7 @@ def generate_code():
             f.write('"use client"\n')
             import_stmt = "import {" + function + "}" + f" from '{module}';\n"
             f.write(import_stmt)
-            f.write("export default function() {\n")
+            f.write(f"export default function {function}GeneratedPage()" + " {\n")
             f.write(f"    return <{function} />;\n")
             f.write("}\n")
     server_file = Path(".xylo") / "backend" / "server.py"
@@ -167,3 +195,31 @@ def clean_xylo():
 
 def cli_entrypoint():
     xylo()
+
+
+@xylo.group()
+def run():
+    """Run a Xylo app component in production."""
+
+
+from http.server import HTTPServer, SimpleHTTPRequestHandler
+
+@run.command()
+def frontend():
+    """Serve frontend static files."""
+    if not Path("index.html").exists():
+        print("You're not in a valid Xylo frontend build. Please cd to the dist/frontend directory.")
+        sys.exit(1)
+    server_address = ('', 8000)
+    httpd = HTTPServer(server_address, SimpleHTTPRequestHandler)
+    print(f"Serving on port {server_address[1]}...")
+    httpd.serve_forever()
+
+@run.command()
+def backend():
+    """Run the backend."""
+    if not Path("src/server.py").exists():
+        print("You're not in a valid Xylo backend build. Please cd to the dist/backend directory.")
+        sys.exit(1)
+    os.system("poetry install")
+    os.system("poetry run python src/server.py")
